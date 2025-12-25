@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://orus-dev.netlify.app/projects"><img src="github/dockship.svg" alt="DockShip" width="350"></a>
+  <a href="https://orus-dev.netlify.app/projects"><img src="public/dockship.svg" alt="DockShip" width="350"></a>
   <br>
   DockShip
   <br>
@@ -14,7 +14,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot (TODO)](/github/screensot.png)
+![screenshot (TODO)](public/screensot.png)
 
 ## Key Features
 
