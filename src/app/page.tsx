@@ -1,6 +1,6 @@
 "use client";
 
-import getDocker from "@/actions/getDocker";
+import { getDocker } from "@/actions/docker";
 
 export default function Home() {
   return (
