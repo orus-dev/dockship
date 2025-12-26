@@ -89,14 +89,16 @@ export default function ApplicationsPage() {
       title="Applications"
       subtitle="Manage deployed applications"
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge>{applications.length} apps</Badge>
           <Badge>
             {applications.filter((a) => a.status === "running").length} running
           </Badge>
         </div>
-        <Button size="sm" className="gap-2">
+
+        <Button size="sm" className="gap-2 w-full sm:w-auto">
           <Plus className="w-4 h-4" />
           Deploy Application
         </Button>
@@ -106,28 +108,30 @@ export default function ApplicationsPage() {
         {applications.map((app) => (
           <Card key={app.id}>
             <CardContent className="p-4">
-              <div className="grid grid-cols-12 gap-4 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:items-center">
                 {/* Status & Name */}
-                <div className="col-span-3 flex items-center gap-3">
+                <div className="flex items-center gap-3 md:col-span-3">
                   <StatusIndicator status={app.status} />
-                  <div>
+                  <div className="min-w-0">
                     <div className="font-mono text-sm font-medium">
                       {app.name}
                     </div>
-                    <div className="text-xs text-muted-foreground font-mono truncate max-w-48">
+                    <div className="text-xs text-muted-foreground font-mono truncate">
                       {app.image}
                     </div>
                   </div>
                 </div>
 
                 {/* Replicas */}
-                <div className="col-span-1">
-                  <div className="text-xs text-muted-foreground">Replicas</div>
+                <div className="flex justify-between md:block md:col-span-1">
+                  <span className="text-xs text-muted-foreground md:hidden">
+                    Replicas
+                  </span>
                   <div className="font-mono text-sm">{app.replicas}</div>
                 </div>
 
                 {/* CPU */}
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <div className="text-xs text-muted-foreground mb-1">CPU</div>
                   <div className="flex items-center gap-2">
                     <Progress value={app.cpu} className="w-full" />
@@ -136,7 +140,7 @@ export default function ApplicationsPage() {
                 </div>
 
                 {/* Memory */}
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <div className="text-xs text-muted-foreground mb-1">
                     Memory
                   </div>
@@ -147,13 +151,15 @@ export default function ApplicationsPage() {
                 </div>
 
                 {/* Network */}
-                <div className="col-span-1">
-                  <div className="text-xs text-muted-foreground">Network</div>
+                <div className="flex justify-between md:block md:col-span-1">
+                  <span className="text-xs text-muted-foreground md:hidden">
+                    Network
+                  </span>
                   <div className="font-mono text-xs">{app.network}</div>
                 </div>
 
                 {/* Ports */}
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <div className="text-xs text-muted-foreground mb-1">
                     Ports
                   </div>
@@ -171,7 +177,7 @@ export default function ApplicationsPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="col-span-1 flex items-center justify-end gap-1">
+                <div className="flex items-center justify-end gap-1 md:col-span-1">
                   {app.status === "running" ? (
                     <Button variant="ghost" size="icon-sm">
                       <Square className="w-3 h-3" />

@@ -14,6 +14,8 @@ import {
   Area,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
+import RadialChart from "@/components/RadialChart";
+import { ArrowDownLeft, ArrowUpRight, Cpu, MemoryStick } from "lucide-react";
 
 const cpuData = [
   { time: "00:00", value: 45 },
@@ -81,7 +83,7 @@ export default function MonitoringPage() {
       subtitle="Resource utilization and metrics"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
@@ -123,16 +125,15 @@ export default function MonitoringPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              CPU Usage
-              <Badge variant="outline">Last 12 hours</Badge>
+            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+              CPU Usage <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-48">
+            <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={cpuData}>
                   <defs>
@@ -169,8 +170,8 @@ export default function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 7%)",
-                      border: "1px solid hsl(0, 0%, 18%)",
+                      backgroundColor: "hsl(0,0%,7%)",
+                      border: "1px solid hsl(0,0%,18%)",
                       borderRadius: "4px",
                       fontSize: "12px",
                     }}
@@ -190,13 +191,12 @@ export default function MonitoringPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              Memory Usage
-              <Badge variant="outline">Last 12 hours</Badge>
+            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+              Memory Usage <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-48">
+            <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={memoryData}>
                   <defs>
@@ -233,8 +233,8 @@ export default function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 7%)",
-                      border: "1px solid hsl(0, 0%, 18%)",
+                      backgroundColor: "hsl(0,0%,7%)",
+                      border: "1px solid hsl(0,0%,18%)",
                       borderRadius: "4px",
                       fontSize: "12px",
                     }}
@@ -256,13 +256,12 @@ export default function MonitoringPage() {
       {/* Network Chart */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between">
-            Network I/O
-            <Badge variant="outline">Last 12 hours</Badge>
+          <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+            Network I/O <Badge variant="outline">Last 12 hours</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-48">
+          <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={networkData}>
                 <XAxis
@@ -278,8 +277,8 @@ export default function MonitoringPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(0, 0%, 7%)",
-                    border: "1px solid hsl(0, 0%, 18%)",
+                    backgroundColor: "hsl(0,0%,7%)",
+                    border: "1px solid hsl(0,0%,18%)",
                     borderRadius: "4px",
                     fontSize: "12px",
                   }}
@@ -303,7 +302,7 @@ export default function MonitoringPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-6 mt-2">
+          <div className="flex flex-wrap gap-6 mt-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-0.5 bg-primary" />
               <span className="text-xs text-muted-foreground">Inbound</span>
@@ -322,7 +321,7 @@ export default function MonitoringPage() {
           <CardTitle>Container Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {containerMetrics.map((container) => (
               <div
                 key={container.name}

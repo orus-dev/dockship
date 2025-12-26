@@ -116,7 +116,8 @@ export default function ContainersPage() {
       title="Containers"
       subtitle="View and manage container instances"
     >
-      <div className="flex items-center gap-2 mb-6">
+      {/* Stats */}
+      <div className="flex flex-wrap gap-2 mb-6">
         <Badge>{containers.length} containers</Badge>
         <Badge>
           {containers.filter((c) => c.status === "running").length} running
@@ -131,98 +132,161 @@ export default function ContainersPage() {
 
       <Card>
         <CardContent className="p-0">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Container
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Image
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Node
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Status
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Uptime
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  CPU
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Memory
-                </th>
-                <th className="text-right text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {containers.map((container) => (
-                <tr key={container.id} className="data-table-row">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <Terminal className="w-4 h-4 text-muted-foreground" />
-                      <div>
-                        <div className="font-mono text-sm">
-                          {container.name}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground font-mono">
-                          {container.id}
+          {/* ================= DESKTOP TABLE ================= */}
+          <div className="hidden md:block">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  {[
+                    "Container",
+                    "Image",
+                    "Node",
+                    "Status",
+                    "Uptime",
+                    "CPU",
+                    "Memory",
+                    "Actions",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className={`text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4 ${
+                        h === "Actions" ? "text-right" : ""
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {containers.map((container) => (
+                  <tr key={container.id} className="data-table-row">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-muted-foreground" />
+                        <div>
+                          <div className="font-mono text-sm">
+                            {container.name}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            {container.id}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs text-muted-foreground">
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">
                       {container.image}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge>{container.node}</Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusIndicator status={container.status} showLabel />
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs">
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <Badge>{container.node}</Badge>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <StatusIndicator status={container.status} showLabel />
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs">
                       {container.uptime}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs">{container.cpu}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs">
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs">
+                      {container.cpu}
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs">
                       {container.memory}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center justify-end gap-1">
-                      {container.status === "running" ? (
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <div className="flex justify-end gap-1">
+                        {container.status === "running" ? (
+                          <Button variant="ghost" size="icon-sm">
+                            <Square className="w-3 h-3" />
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="icon-sm">
+                            <Play className="w-3 h-3" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon-sm">
-                          <Square className="w-3 h-3" />
+                          <Trash2 className="w-3 h-3" />
                         </Button>
-                      ) : (
                         <Button variant="ghost" size="icon-sm">
-                          <Play className="w-3 h-3" />
+                          <MoreVertical className="w-3 h-3" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="icon-sm">
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm">
-                        <MoreVertical className="w-3 h-3" />
-                      </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= MOBILE CARDS ================= */}
+          <div className="md:hidden divide-y divide-border">
+            {containers.map((container) => (
+              <div key={container.id} className="p-4 space-y-3">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-mono text-sm">{container.name}</span>
+                  </div>
+                  <StatusIndicator status={container.status} />
+                </div>
+
+                <div className="text-[10px] font-mono text-muted-foreground">
+                  {container.id}
+                </div>
+
+                <div className="text-xs font-mono text-muted-foreground truncate">
+                  {container.image}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Node</span>
+                    <div>
+                      <Badge>{container.node}</Badge>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Uptime</span>
+                    <div className="font-mono">{container.uptime}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">CPU</span>
+                    <div className="font-mono">{container.cpu}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Memory</span>
+                    <div className="font-mono">{container.memory}</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-1 pt-2">
+                  {container.status === "running" ? (
+                    <Button variant="ghost" size="icon-sm">
+                      <Square className="w-3 h-3" />
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="icon-sm">
+                      <Play className="w-3 h-3" />
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon-sm">
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm">
+                    <MoreVertical className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </DashboardLayout>
