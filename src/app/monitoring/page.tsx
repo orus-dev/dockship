@@ -3,7 +3,6 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import {
   LineChart,
   Line,
@@ -14,6 +13,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { Progress } from "@/components/ui/progress";
 
 const cpuData = [
   { time: "00:00", value: 45 },
@@ -88,7 +88,7 @@ export default function MonitoringPage() {
               Cluster CPU
             </div>
             <div className="stat-value">68%</div>
-            <MetricBar value={68} max={100} />
+            <Progress value={68} className="w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -97,7 +97,7 @@ export default function MonitoringPage() {
               Cluster Memory
             </div>
             <div className="stat-value">71%</div>
-            <MetricBar value={71} max={100} />
+            <Progress value={71} className="w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -337,14 +337,14 @@ export default function MonitoringPage() {
                       <span>CPU</span>
                       <span>{container.cpu}%</span>
                     </div>
-                    <MetricBar value={container.cpu} max={100} />
+                    <Progress value={container.cpu} className="w-full" />
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>Memory</span>
                       <span>{container.memory}%</span>
                     </div>
-                    <MetricBar value={container.memory} max={100} />
+                    <Progress value={container.memory} className="w-full" />
                   </div>
                   <div className="flex justify-between text-[10px] pt-1 border-t border-border">
                     <span className="text-muted-foreground">Network</span>

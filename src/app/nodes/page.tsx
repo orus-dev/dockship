@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import { Server, Plus, Settings, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const nodes = [
   {
@@ -130,7 +130,7 @@ export default function NodesPage() {
                     CPU ({node.cpu.cores} cores)
                   </div>
                   <div className="stat-value mb-2">{node.cpu.usage}%</div>
-                  <MetricBar value={node.cpu.usage} max={100} />
+                  <Progress value={node.cpu.usage} className="w-full" />
                 </div>
 
                 {/* Memory */}
@@ -141,7 +141,7 @@ export default function NodesPage() {
                   <div className="stat-value mb-2">
                     {node.memory.percentage}%
                   </div>
-                  <MetricBar value={node.memory.percentage} max={100} />
+                  <Progress value={node.memory.percentage} className="w-full" />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
                     {node.memory.used} / {node.memory.total}
                   </div>
@@ -151,7 +151,7 @@ export default function NodesPage() {
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">Disk</div>
                   <div className="stat-value mb-2">{node.disk.percentage}%</div>
-                  <MetricBar value={node.disk.percentage} max={100} />
+                  <Progress value={node.disk.percentage} className="w-full" />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
                     {node.disk.used} / {node.disk.total}
                   </div>

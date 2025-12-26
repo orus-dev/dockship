@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import {
   Box,
   Server,
@@ -15,6 +14,7 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const recentDeployments = [
   {
@@ -172,7 +172,7 @@ export default function OverviewPage() {
                   </div>
                   <div className="col-span-2">
                     <div className="flex items-center gap-2">
-                      <MetricBar value={app.cpu} max={100} />
+                      <Progress value={app.cpu} className="w-full" />
                       <span className="text-xs text-muted-foreground font-mono w-8">
                         {app.cpu}%
                       </span>
@@ -180,7 +180,7 @@ export default function OverviewPage() {
                   </div>
                   <div className="col-span-2">
                     <div className="flex items-center gap-2">
-                      <MetricBar value={app.memory} max={100} />
+                      <Progress value={app.memory} className="w-full" />
                       <span className="text-xs text-muted-foreground font-mono w-8">
                         {app.memory}%
                       </span>
@@ -257,12 +257,12 @@ export default function OverviewPage() {
                     <span className="text-muted-foreground">CPU</span>
                     <span className="font-mono">{node.cpu}%</span>
                   </div>
-                  <MetricBar value={node.cpu} max={100} />
+                  <Progress value={node.cpu} className="bg-primary" />
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Memory</span>
                     <span className="font-mono">{node.memory}%</span>
                   </div>
-                  <MetricBar value={node.memory} max={100} />
+                  <Progress value={node.memory} className="w-full" />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
                     <span className="text-muted-foreground">Containers</span>
                     <span className="font-mono">{node.containers}</span>

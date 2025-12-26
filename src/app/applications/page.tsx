@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const applications = [
   {
@@ -130,7 +130,7 @@ export default function ApplicationsPage() {
                 <div className="col-span-2">
                   <div className="text-xs text-muted-foreground mb-1">CPU</div>
                   <div className="flex items-center gap-2">
-                    <MetricBar value={app.cpu} max={100} />
+                    <Progress value={app.cpu} className="w-full" />
                     <span className="text-xs font-mono w-8">{app.cpu}%</span>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export default function ApplicationsPage() {
                     Memory
                   </div>
                   <div className="flex items-center gap-2">
-                    <MetricBar value={app.memory} max={100} />
+                    <Progress value={app.memory} className="w-full" />
                     <span className="text-xs font-mono w-8">{app.memory}%</span>
                   </div>
                 </div>
