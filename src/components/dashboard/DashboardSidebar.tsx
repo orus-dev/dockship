@@ -17,7 +17,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 const navigation = [
-  { name: "Overview", href: "/", icon: LayoutGrid },
+  { name: "Overview", href: "/overview", icon: LayoutGrid },
   { name: "Applications", href: "/applications", icon: Box },
   { name: "Containers", href: "/containers", icon: Terminal },
   { name: "Nodes", href: "/nodes", icon: Server },
