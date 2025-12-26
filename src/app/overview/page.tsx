@@ -15,6 +15,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import Link from "next/link";
 
 const recentDeployments = [
   {
@@ -148,9 +149,11 @@ export default function OverviewPage() {
         <Card className="col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Applications</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs gap-1">
-              View all <ArrowRight className="w-3 h-3" />
-            </Button>
+            <Link href="/applications">
+              <Button variant="ghost" size="sm" className="text-xs gap-1">
+                View all <ArrowRight className="w-3 h-3" />
+              </Button>
+            </Link>
           </CardHeader>
           <CardContent>
             <div className="space-y-0">
@@ -199,9 +202,11 @@ export default function OverviewPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Deployments</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs gap-1">
-              View all <ArrowRight className="w-3 h-3" />
-            </Button>
+            <Link href="/deployments">
+              <Button variant="ghost" size="sm" className="text-xs gap-1">
+                View all <ArrowRight className="w-3 h-3" />
+              </Button>
+            </Link>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

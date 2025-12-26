@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pause, Play, Download, Filter, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const logEntries = [
   {
@@ -144,11 +145,11 @@ export default function LogsPage() {
   const getLevelClass = (level: string) => {
     switch (level) {
       case "info":
-        return "log-info";
+        return "text-blue-400";
       case "warn":
-        return "log-warn";
+        return "text-yellow-300";
       case "error":
-        return "log-error";
+        return "text-destructive";
       default:
         return "";
     }
@@ -240,16 +241,17 @@ export default function LogsPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0 overflow-auto h-[calc(100%-48px)]">
-          <div className="font-mono text-xs">
+          <div className="font-mono text-xs mx-6">
             {filteredLogs.map((log, index) => (
-              <div key={index} className="log-line flex">
-                <span className="log-timestamp whitespace-nowrap">
+              <div key={index} className="flex">
+                <span className="text-gray-400 whitespace-nowrap">
                   {log.timestamp}
                 </span>
                 <span
-                  className={`uppercase w-12 shrink-0 ${getLevelClass(
-                    log.level
-                  )}`}
+                  className={cn(
+                    "uppercase w-12 shrink-0 mx-3",
+                    getLevelClass(log.level)
+                  )}
                 >
                   [{log.level}]
                 </span>
