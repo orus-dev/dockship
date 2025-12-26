@@ -128,7 +128,7 @@ export default function MonitoringPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between">
               CPU Usage
-              <Badge>Last 12 hours</Badge>
+              <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -145,12 +145,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="hsl(180, 100%, 50%)"
+                        stopColor="oklch(0.66 0.13 227.70)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(180, 100%, 50%)"
+                        stopColor="oklch(0.66 0.13 227.70)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -178,7 +178,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(180, 100%, 50%)"
+                    stroke="oklch(0.66 0.13 227.70)"
                     strokeWidth={2}
                     fill="url(#cpuGradient)"
                   />
@@ -192,7 +192,7 @@ export default function MonitoringPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between">
               Memory Usage
-              <Badge>Last 12 hours</Badge>
+              <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -209,12 +209,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="hsl(142, 70%, 45%)"
+                        stopColor="oklch(0.70 0.15 159.83)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(142, 70%, 45%)"
+                        stopColor="oklch(0.70 0.15 159.83)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -242,7 +242,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(142, 70%, 45%)"
+                    stroke="oklch(0.70 0.15 159.83)"
                     strokeWidth={2}
                     fill="url(#memoryGradient)"
                   />
@@ -258,7 +258,7 @@ export default function MonitoringPage() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between">
             Network I/O
-            <Badge>Last 12 hours</Badge>
+            <Badge variant="outline">Last 12 hours</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -287,7 +287,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="in"
-                  stroke="hsl(180, 100%, 50%)"
+                  stroke="oklch(0.80 0.10 100.65)"
                   strokeWidth={2}
                   dot={false}
                   name="Inbound"
@@ -295,7 +295,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="out"
-                  stroke="hsl(38, 92%, 50%)"
+                  stroke="oklch(0.60 0.15 300.14)"
                   strokeWidth={2}
                   dot={false}
                   name="Outbound"

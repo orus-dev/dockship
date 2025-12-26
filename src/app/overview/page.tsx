@@ -262,12 +262,12 @@ export default function OverviewPage() {
                     <span className="text-muted-foreground">CPU</span>
                     <span className="font-mono">{node.cpu}%</span>
                   </div>
-                  <Progress value={node.cpu} className="bg-primary" />
+                  <Progress value={node.cpu} className="[&>div]:bg-chart-1" />
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Memory</span>
                     <span className="font-mono">{node.memory}%</span>
                   </div>
-                  <Progress value={node.memory} className="w-full" />
+                  <Progress value={node.memory} className="w-full [&>div]:bg-chart-3" />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
                     <span className="text-muted-foreground">Containers</span>
                     <span className="font-mono">{node.containers}</span>
