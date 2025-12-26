@@ -91,8 +91,8 @@ export default function ApplicationsPage() {
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Badge variant="terminal">{applications.length} apps</Badge>
-          <Badge variant="success">
+          <Badge>{applications.length} apps</Badge>
+          <Badge>
             {applications.filter((a) => a.status === "running").length} running
           </Badge>
         </div>
@@ -160,11 +160,7 @@ export default function ApplicationsPage() {
                   <div className="flex gap-1 flex-wrap">
                     {app.ports.length > 0 ? (
                       app.ports.map((port) => (
-                        <Badge
-                          key={port}
-                          variant="terminal"
-                          className="text-[10px]"
-                        >
+                        <Badge key={port} className="text-[10px]">
                           {port}
                         </Badge>
                       ))

@@ -117,11 +117,11 @@ export default function ContainersPage() {
       subtitle="View and manage container instances"
     >
       <div className="flex items-center gap-2 mb-6">
-        <Badge variant="terminal">{containers.length} containers</Badge>
-        <Badge variant="success">
+        <Badge>{containers.length} containers</Badge>
+        <Badge>
           {containers.filter((c) => c.status === "running").length} running
         </Badge>
-        <Badge variant="warning">
+        <Badge>
           {containers.filter((c) => c.status === "pending").length} pending
         </Badge>
         <Badge variant="destructive">
@@ -182,7 +182,7 @@ export default function ContainersPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <Badge variant="terminal">{container.node}</Badge>
+                    <Badge>{container.node}</Badge>
                   </td>
                   <td className="py-3 px-4">
                     <StatusIndicator status={container.status} showLabel />

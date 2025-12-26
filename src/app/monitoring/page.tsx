@@ -128,7 +128,7 @@ export default function MonitoringPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between">
               CPU Usage
-              <Badge variant="terminal">Last 12 hours</Badge>
+              <Badge>Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -192,7 +192,7 @@ export default function MonitoringPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center justify-between">
               Memory Usage
-              <Badge variant="terminal">Last 12 hours</Badge>
+              <Badge>Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -258,7 +258,7 @@ export default function MonitoringPage() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between">
             Network I/O
-            <Badge variant="terminal">Last 12 hours</Badge>
+            <Badge>Last 12 hours</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

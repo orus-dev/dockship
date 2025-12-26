@@ -62,7 +62,7 @@ export default function EnvironmentPage() {
     >
       <div className="flex gap-6">
         {/* Sidebar */}
-        <div className="w-56 flex-shrink-0">
+        <div className="w-56 shrink-0">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">
@@ -81,7 +81,7 @@ export default function EnvironmentPage() {
                   }`}
                 >
                   {group.name}
-                  <Badge variant="terminal" className="ml-2 text-[10px]">
+                  <Badge className="ml-2 text-[10px]">
                     {group.variables.length}
                   </Badge>
                 </button>

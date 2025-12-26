@@ -97,7 +97,7 @@ export default function DeploymentsPage() {
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Badge variant="terminal">{deployments.length} deployments</Badge>
+          <Badge>{deployments.length} deployments</Badge>
         </div>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />

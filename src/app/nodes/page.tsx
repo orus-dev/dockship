@@ -58,8 +58,8 @@ export default function NodesPage() {
     <DashboardLayout title="Nodes" subtitle="Cluster node management">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Badge variant="terminal">{nodes.length} nodes</Badge>
-          <Badge variant="success">
+          <Badge>{nodes.length} nodes</Badge>
+          <Badge>
             {nodes.filter((n) => n.status === "running").length} online
           </Badge>
         </div>
@@ -163,18 +163,10 @@ export default function NodesPage() {
                     Quick Actions
                   </div>
                   <div className="space-y-1">
-                    <Button
-                      variant="terminal"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
+                    <Button size="sm" className="w-full justify-start">
                       SSH Connect
                     </Button>
-                    <Button
-                      variant="terminal"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
+                    <Button size="sm" className="w-full justify-start">
                       View Logs
                     </Button>
                   </div>

@@ -224,13 +224,13 @@ export default function LogsPage() {
         </div>
       </div>
 
-      <Card variant="terminal" className="h-[calc(100vh-240px)]">
+      <Card className="h-[calc(100vh-240px)]">
         <CardHeader className="flex flex-row items-center justify-between py-2 px-4 border-b border-border">
           <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">
             Log Stream
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Badge variant="terminal">{filteredLogs.length} entries</Badge>
+            <Badge>{filteredLogs.length} entries</Badge>
             {!isPaused && (
               <div className="flex items-center gap-1 text-xs text-success">
                 <RefreshCw className="w-3 h-3 animate-spin" />
@@ -247,13 +247,13 @@ export default function LogsPage() {
                   {log.timestamp}
                 </span>
                 <span
-                  className={`uppercase w-12 flex-shrink-0 ${getLevelClass(
+                  className={`uppercase w-12 shrink-0 ${getLevelClass(
                     log.level
                   )}`}
                 >
                   [{log.level}]
                 </span>
-                <span className="text-muted-foreground w-40 flex-shrink-0 truncate">
+                <span className="text-muted-foreground w-40 shrink-0 truncate">
                   {log.source}
                 </span>
                 <span className="text-foreground">{log.message}</span>

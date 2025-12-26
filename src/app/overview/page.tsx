@@ -234,7 +234,7 @@ export default function OverviewPage() {
       <Card className="mt-4">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Cluster Nodes</CardTitle>
-          <Badge variant="terminal">{nodes.length} nodes</Badge>
+          <Badge>{nodes.length} nodes</Badge>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
