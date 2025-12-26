@@ -9,7 +9,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
-  Terminal,
+  Container,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import Link from "next/link";
 const navigation = [
   { name: "Overview", href: "/overview", icon: LayoutGrid },
   { name: "Applications", href: "/applications", icon: Box },
-  { name: "Containers", href: "/containers", icon: Terminal },
+  { name: "Containers", href: "/containers", icon: Container },
   { name: "Nodes", href: "/nodes", icon: Server },
   { name: "Deployments", href: "/deployments", icon: Rocket },
   { name: "Logs", href: "/logs", icon: FileText },
@@ -64,11 +64,11 @@ export function DashboardSidebar() {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 text-sm transition-colors",
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary -ml-[2px]"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary -ml-0.5"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
-                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  <item.icon className="w-4 h-4 shrink-0" />
                   {!collapsed && <span>{item.name}</span>}
                 </Link>
               </li>
