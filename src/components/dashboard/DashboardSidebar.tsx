@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+
 import {
   LayoutGrid,
   Box,
@@ -7,14 +8,28 @@ import {
   FileText,
   Settings,
   Activity,
-  ChevronLeft,
-  ChevronRight,
   Container,
+  Command,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { version } from "../../../package.json";
 
 const navigation = [
   { name: "Overview", href: "/overview", icon: LayoutGrid },
@@ -28,70 +43,69 @@ const navigation = [
 ];
 
 export function DashboardSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const location = usePathname();
+  const pathname = usePathname();
 
   return (
-    <aside
-      className={cn(
-        "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        collapsed ? "w-14" : "w-56"
-      )}
-    >
-      {/* Logo */}
-      <div className="flex items-center h-14 px-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-bold">D</span>
-          </div>
-          {!collapsed && (
-            <span className="font-mono font-semibold text-foreground tracking-tight">
-              DOCKSHIP
-            </span>
-          )}
-        </div>
-      </div>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-primary-foreground">
+                  <Image
+                    src="/dockship.svg"
+                    alt="DockShip"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">DOCKSHIP</span>
+                  <span className="text-xs text-muted-foreground">
+                    v{version}
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 overflow-y-auto">
-        <ul className="space-y-1 px-2">
-          {navigation.map((item) => {
-            const isActive = location === item.href;
-            return (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => (
+                <SidebarMenuItem
+                  key={item.name}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 text-sm transition-colors",
-                    isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary -ml-0.5"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    "border-l-2",
+                    item.href === pathname
+                      ? "border-primary"
+                      : "border-transparent"
                   )}
                 >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                    tooltip={item.name}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {/* Collapse Toggle */}
-      <div className="p-2 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex justify-center"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </Button>
-      </div>
-    </aside>
+      <SidebarFooter></SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   );
 }
