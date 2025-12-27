@@ -26,8 +26,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const root = disks.find((d) => d.mount === "/" || d.fs.includes("disk3"));
 
-  console.log(mem.available, mem.total);
-
   return NextResponse.json({
     message: "ok",
     liveData: {

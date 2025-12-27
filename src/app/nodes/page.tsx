@@ -10,6 +10,8 @@ import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { getDockerNode, getLiveNodes } from "@/core/client/node";
 import { formatBytes } from "@/lib/format";
+import { setNodes as updateNodes } from "@/core/client/node";
+import AddNode from "@/components/dialogs/AddNode";
 
 function DiskUsage({ liveData }: NodeLiveData) {
   const usage = (liveData.disk.used / liveData.disk.size) * 100;
@@ -56,14 +58,16 @@ export default function NodesPage() {
             {/* {nodes.filter((n) => n.status === "running").length} online */}
           </Badge>
         </div>
-        <Button size="sm" className="gap-2">
-          <Plus className="w-4 h-4" /> Add Node
-        </Button>
+        <AddNode>
+          <Button size="sm" className="gap-2">
+            <Plus className="w-4 h-4" /> Add Node
+          </Button>
+        </AddNode>
       </div>
 
       <div className="flex flex-col gap-4">
         {nodes.map((node, i) => (
-          <Card key={node.node_id}>
+          <Card key={i}>
             <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between pb-2 gap-2 sm:gap-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="w-10 h-10 bg-secondary flex items-center justify-center">
@@ -88,7 +92,15 @@ export default function NodesPage() {
                 <Button variant="ghost" size="icon-sm">
                   <Settings className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon-sm">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={async () => {
+                    const newNodes = nodes.filter((_, index) => index !== i);
+                    setNodes(newNodes);
+                    await updateNodes(newNodes);
+                  }}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>

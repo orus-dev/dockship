@@ -227,11 +227,8 @@ export default function OverviewPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-75">
-            {nodes.map((node) => (
-              <div
-                key={node.name}
-                className="border border-border p-4 bg-secondary/30"
-              >
+            {nodes.map((node, i) => (
+              <div key={i} className="border border-border p-4 bg-secondary/30">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
                     <StatusIndicator status={"running"} />

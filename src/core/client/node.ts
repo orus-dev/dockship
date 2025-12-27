@@ -39,3 +39,13 @@ export async function getDockerNode(node: Node): Promise<Docker> {
   ).data;
   return { ...node, containers: data.containers, version: data.version };
 }
+
+export async function authNode(ip: string, key: string) {
+  const data = await (
+    await axios.get(`http://${ip}:3000/api/auth`, {
+      headers: { Authorization: `ApiKey ${key}` },
+    })
+  ).data;
+
+  return { version: data.version, node_id: data.node_id, os: data.os };
+}

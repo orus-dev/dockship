@@ -6,6 +6,7 @@ export interface Node {
   ip: string;
   os: string;
   name: string;
+  description: string;
   labels: string[];
 }
 
