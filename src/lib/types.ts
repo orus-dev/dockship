@@ -1,9 +1,12 @@
+import { ContainerInfo } from "dockerode";
+
 export interface Node {
   node_id: string;
   key: string;
   ip: string;
+  os: string;
   name: string;
-  labels?: string[];
+  labels: string[];
 }
 
 export interface NodeLiveData {
@@ -37,4 +40,9 @@ export interface NodeLiveData {
       tx: number;
     }[];
   };
+}
+
+export interface Docker {
+  version: string;
+  containers: ContainerInfo[];
 }

@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Server, Plus, Settings, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Node, NodeLiveData } from "@/lib/types";
+import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { getLiveNodes } from "@/core/client/node";
+import { getDockerNode, getLiveNodes } from "@/core/client/node";
 import { formatBytes } from "@/lib/format";
 
 function DiskUsage({ liveData }: NodeLiveData) {
@@ -28,6 +28,7 @@ function DiskUsage({ liveData }: NodeLiveData) {
 
 export default function NodesPage() {
   const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
+  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -38,6 +39,13 @@ export default function NodesPage() {
     const interval = setInterval(fetchNodes, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const fetchDocker = async () => {
+      setDockerNodes(await Promise.all(nodes.map(getDockerNode)));
+    };
+    fetchDocker();
+  }, [nodes]);
 
   return (
     <DashboardLayout title="Nodes" subtitle="Cluster node management">
@@ -54,7 +62,7 @@ export default function NodesPage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {nodes.map((node) => (
+        {nodes.map((node, i) => (
           <Card key={node.node_id}>
             <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between pb-2 gap-2 sm:gap-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -72,16 +80,11 @@ export default function NodesPage() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
-                {node.labels &&
-                  node.labels.map((label) => (
-                    <Badge
-                      key={label}
-                      variant="outline"
-                      className="text-[10px]"
-                    >
-                      {label}
-                    </Badge>
-                  ))}
+                {node.labels.map((label) => (
+                  <Badge key={label} variant="outline" className="text-[10px]">
+                    {label}
+                  </Badge>
+                ))}
                 <Button variant="ghost" size="icon-sm">
                   <Settings className="w-4 h-4" />
                 </Button>
@@ -100,15 +103,19 @@ export default function NodesPage() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">OS</span>
-                      {/* <span className="font-mono">{node.os}</span> */}
+                      <span className="font-mono">{node.os}</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Docker</span>
-                      {/* <span className="font-mono">{node.docker}</span> */}
+                      <span className="font-mono">
+                        {dockerNodes[i]?.version}
+                      </span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Containers</span>
-                      {/* <span className="font-mono">{node.containers}</span> */}
+                      <span className="font-mono">
+                        {dockerNodes[i]?.containers.length}
+                      </span>
                     </div>
                   </div>
                 </div>
