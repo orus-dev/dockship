@@ -17,12 +17,12 @@ export async function getNode(node_id: string): Promise<Node | undefined> {
   return nodes.find((v) => v.node_id === node_id);
 }
 
-export async function getLiveNodes(): Promise<NodeLiveData[]> {
+export async function getLiveNodes(): Promise<(NodeLiveData & Node)[]> {
   const nodes = await read(() => [], "data", "nodes.json");
   return await Promise.all(nodes.map(getLiveNode));
 }
 
-export async function getLiveNode(node: Node): Promise<NodeLiveData> {
+export async function getLiveNode(node: Node): Promise<NodeLiveData & Node> {
   const data = await (
     await axios.get(`http://${node.ip}:3000/api/status`, {
       headers: { Authorization: `ApiKey ${node.key}` },

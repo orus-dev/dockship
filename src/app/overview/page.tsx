@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { getLiveNodes, getNodes } from "@/core/client/node";
+import { getLiveNodes } from "@/core/client/node";
 import { useEffect, useState } from "react";
 import { Node, NodeLiveData } from "@/lib/types";
 
@@ -90,7 +90,7 @@ const applications = [
 ].slice(-5);
 
 export default function OverviewPage() {
-  const [nodes, setNodes] = useState<NodeLiveData[]>([]);
+  const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {

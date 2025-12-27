@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
 import si from "systeminformation";
+import { NodeLiveData } from "@/lib/types";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -21,6 +22,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     si.networkStats(),
   ]);
 
+  const disks = await si.fsSize();
+
+  const root = disks.find((d) => d.mount === "/" || d.fs.includes("disk3"));
+
   return NextResponse.json({
     message: "ok",
     liveData: {
@@ -36,7 +41,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         free: mem.free,
         usage: ((mem.total - mem.free) / mem.total) * 100,
       },
-      disk: disk.map((d) => ({
+      disk: {
+        used: (root?.size || 0) - (root?.available || 0),
+        size: root?.size || 0,
+        available: root?.available || 0,
+      },
+      disks: disk.map((d) => ({
         fs: d.fs,
         size: d.size,
         used: d.used,
@@ -48,5 +58,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         tx: n.tx_bytes,
       })),
     },
-  });
+  } as NodeLiveData);
 }

@@ -1,15 +1,12 @@
 export interface Node {
-  name: string;
   node_id: string;
-  ip: string;
   key: string;
+  ip: string;
+  name: string;
+  labels?: string[];
 }
 
 export interface NodeLiveData {
-  name: string;
-  node_id: string;
-  ip: string;
-  key: string;
   liveData: {
     cpu: {
       manufacturer: string;
@@ -24,6 +21,11 @@ export interface NodeLiveData {
       usage: number;
     };
     disk: {
+      size: number;
+      available: number;
+      used: number;
+    };
+    disks: {
       fs: string;
       size: number;
       used: number;
