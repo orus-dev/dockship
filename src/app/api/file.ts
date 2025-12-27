@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 export async function read<T extends object>(
-  template: T,
+  template: () => T,
   fp: string,
   ...filePaths: string[]
 ): Promise<T> {

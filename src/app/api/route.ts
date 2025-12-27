@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { version } from "../../../package.json";
 import { read } from "./file";
-import { randomUUID } from "crypto";
-
-const TEMPLATE = { node_id: randomUUID() };
+import { NodeJsonTemplate } from "./types";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { node_id } = await read(TEMPLATE, "data", "node.json");
+  const { node_id } = await read(NodeJsonTemplate, "data", "node.json");
+
   return NextResponse.json({ app: "dockship", version, node_id });
 }
