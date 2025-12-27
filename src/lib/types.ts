@@ -11,10 +11,28 @@ export interface NodeLiveData {
   ip: string;
   key: string;
   liveData: {
-    status: "running" | "pending" | "error";
-    cpu: number;
-    memory: number;
-    disk: number;
-    containers: number;
+    cpu: {
+      manufacturer: string;
+      brand: string;
+      cores: number;
+      usage: number;
+    };
+    memory: {
+      total: number;
+      used: number;
+      free: number;
+      usage: number;
+    };
+    disk: {
+      fs: string;
+      size: number;
+      used: number;
+      usage: number;
+    }[];
+    network: {
+      iface: string;
+      rx: number;
+      tx: number;
+    }[];
   };
 }

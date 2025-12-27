@@ -87,13 +87,19 @@ const applications = [
     memory: 48,
     status: "pending" as const,
   },
-];
+].slice(-5);
 
 export default function OverviewPage() {
   const [nodes, setNodes] = useState<NodeLiveData[]>([]);
 
   useEffect(() => {
-    getLiveNodes().then(setNodes);
+    const fetchNodes = async () => {
+      const nodes = await getLiveNodes();
+      setNodes(nodes);
+    };
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -228,7 +234,7 @@ export default function OverviewPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
-                    <StatusIndicator status={node.liveData.status} />
+                    <StatusIndicator status={"running"} />
                     <span className="font-mono text-sm">{node.name}</span>
                   </div>
                   <span className="text-xs text-muted-foreground font-mono">
@@ -238,25 +244,27 @@ export default function OverviewPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">CPU</span>
-                    <span className="font-mono">{node.liveData.cpu}%</span>
+                    <span className="font-mono">
+                      {node.liveData.cpu.usage.toFixed(0)}%
+                    </span>
                   </div>
                   <Progress
-                    value={node.liveData.cpu}
+                    value={node.liveData.cpu.usage}
                     className="[&>div]:bg-chart-1"
                   />
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Memory</span>
-                    <span className="font-mono">{node.liveData.memory}%</span>
+                    <span className="font-mono">
+                      {node.liveData.memory.usage.toFixed(0)}%
+                    </span>
                   </div>
                   <Progress
-                    value={node.liveData.memory}
+                    value={node.liveData.memory.usage}
                     className="w-full [&>div]:bg-chart-3"
                   />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
                     <span className="text-muted-foreground">Containers</span>
-                    <span className="font-mono">
-                      {node.liveData.containers}
-                    </span>
+                    <span className="font-mono">{6}</span>
                   </div>
                 </div>
               </div>
