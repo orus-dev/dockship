@@ -5,7 +5,10 @@ import { NextRequest } from "next/server";
 export default async function testAuth(
   req: NextRequest
 ): Promise<null | string> {
-  const auth = req.headers.get("Authorization")?.replaceAll("ApiKey", "");
+  const auth = req.headers
+    .get("Authorization")
+    ?.replaceAll("ApiKey", "")
+    .trim();
 
   if (!auth)
     return "Missing Authorization header (Authorization: ApiKey <key>)";

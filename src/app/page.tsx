@@ -1,13 +1,13 @@
 "use client";
 
-import { getDocker } from "@/core/docker";
+import { getDocker } from "@/core/client/docker";
 
 export default function Home() {
   return (
     <div>
       <button
-        onClick={() => {
-          getDocker();
+        onClick={async () => {
+          console.log(await getDocker("localhost", "oD7tMrnkxIvuFrR+b6QZh66E4PU="));
         }}
       >
         Get docker
