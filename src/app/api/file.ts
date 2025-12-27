@@ -13,9 +13,21 @@ export async function read<T extends object>(
     await fs.access(filePath);
   } catch {
     await fs.mkdir(dirPath, { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify(template, null, 2), "utf-8");
+    await fs.writeFile(filePath, JSON.stringify(template(), null, 2), "utf-8");
   }
 
   const content = await fs.readFile(filePath, "utf-8");
   return JSON.parse(content);
+}
+
+export async function write<T extends object>(
+  val: T,
+  fp: string,
+  ...filePaths: string[]
+) {
+  const filePath = path.join(process.cwd(), fp, ...filePaths);
+  const dirPath = path.dirname(filePath);
+
+  await fs.mkdir(dirPath, { recursive: true });
+  await fs.writeFile(filePath, JSON.stringify(val, null, 2), "utf-8");
 }

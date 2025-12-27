@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import { getLiveNodes, getNodes } from "@/core/client/node";
+import { useEffect, useState } from "react";
+import { Node, NodeLiveData } from "@/lib/types";
 
 const recentDeployments = [
   {
@@ -86,34 +89,13 @@ const applications = [
   },
 ];
 
-const nodes = [
-  {
-    name: "node-01",
-    ip: "10.0.1.10",
-    cpu: 72,
-    memory: 68,
-    containers: 8,
-    status: "running" as const,
-  },
-  {
-    name: "node-02",
-    ip: "10.0.1.11",
-    cpu: 45,
-    memory: 52,
-    containers: 6,
-    status: "running" as const,
-  },
-  {
-    name: "node-03",
-    ip: "10.0.1.12",
-    cpu: 89,
-    memory: 85,
-    containers: 12,
-    status: "running" as const,
-  },
-];
-
 export default function OverviewPage() {
+  const [nodes, setNodes] = useState<NodeLiveData[]>([]);
+
+  useEffect(() => {
+    getLiveNodes().then(setNodes);
+  }, []);
+
   return (
     <DashboardLayout title="Overview" subtitle="System status and metrics">
       {/* Stats Grid */}
@@ -246,7 +228,7 @@ export default function OverviewPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
-                    <StatusIndicator status={node.status} />
+                    <StatusIndicator status={node.liveData.status} />
                     <span className="font-mono text-sm">{node.name}</span>
                   </div>
                   <span className="text-xs text-muted-foreground font-mono">
@@ -256,20 +238,25 @@ export default function OverviewPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">CPU</span>
-                    <span className="font-mono">{node.cpu}%</span>
-                  </div>
-                  <Progress value={node.cpu} className="[&>div]:bg-chart-1" />
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Memory</span>
-                    <span className="font-mono">{node.memory}%</span>
+                    <span className="font-mono">{node.liveData.cpu}%</span>
                   </div>
                   <Progress
-                    value={node.memory}
+                    value={node.liveData.cpu}
+                    className="[&>div]:bg-chart-1"
+                  />
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Memory</span>
+                    <span className="font-mono">{node.liveData.memory}%</span>
+                  </div>
+                  <Progress
+                    value={node.liveData.memory}
                     className="w-full [&>div]:bg-chart-3"
                   />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
                     <span className="text-muted-foreground">Containers</span>
-                    <span className="font-mono">{node.containers}</span>
+                    <span className="font-mono">
+                      {node.liveData.containers}
+                    </span>
                   </div>
                 </div>
               </div>
