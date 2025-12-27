@@ -146,12 +146,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="oklch(0.66 0.13 227.70)"
+                        stopColor="var(--chart-1)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="oklch(0.66 0.13 227.70)"
+                        stopColor="var(--chart-1)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -179,7 +179,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="oklch(0.66 0.13 227.70)"
+                    stroke="var(--chart-1)"
                     strokeWidth={2}
                     fill="url(#cpuGradient)"
                   />
@@ -209,12 +209,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="oklch(0.70 0.15 159.83)"
+                        stopColor="var(--chart-3)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="oklch(0.70 0.15 159.83)"
+                        stopColor="var(--chart-3)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -242,7 +242,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="oklch(0.70 0.15 159.83)"
+                    stroke="var(--chart-3)"
                     strokeWidth={2}
                     fill="url(#memoryGradient)"
                   />
@@ -286,7 +286,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="in"
-                  stroke="oklch(0.80 0.10 100.65)"
+                  stroke="var(--chart-2)"
                   strokeWidth={2}
                   dot={false}
                   name="Inbound"
@@ -294,7 +294,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="out"
-                  stroke="oklch(0.60 0.15 300.14)"
+                  stroke="var(--chart-4)"
                   strokeWidth={2}
                   dot={false}
                   name="Outbound"

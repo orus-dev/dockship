@@ -26,6 +26,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const root = disks.find((d) => d.mount === "/" || d.fs.includes("disk3"));
 
+  console.log(mem.available, mem.total);
+
   return NextResponse.json({
     message: "ok",
     liveData: {
@@ -39,7 +41,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         total: mem.total,
         used: mem.used,
         free: mem.free,
-        usage: ((mem.total - mem.free) / mem.total) * 100,
+        usage: ((mem.total - mem.available) / mem.total) * 100,
       },
       disk: {
         used: (root?.size || 0) - (root?.available || 0),
