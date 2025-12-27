@@ -95,101 +95,156 @@ export default function DeploymentsPage() {
       title="Deployments"
       subtitle="Deployment history and management"
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Badge variant="terminal">{deployments.length} deployments</Badge>
-        </div>
-        <Button size="sm" className="gap-2">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <Badge>{deployments.length} deployments</Badge>
+
+        <Button size="sm" className="gap-2 self-start sm:self-auto">
           <Plus className="w-4 h-4" />
-          New Deployment
+          <span className="hidden sm:inline">New Deployment</span>
         </Button>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Application
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Version
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Status
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Replicas
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Deployed
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Duration
-                </th>
-                <th className="text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Deployed By
-                </th>
-                <th className="text-right text-xs text-muted-foreground uppercase tracking-wider py-3 px-4">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {deployments.map((dep) => (
-                <tr key={dep.id} className="data-table-row">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <Rocket className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-mono text-sm">{dep.app}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <GitBranch className="w-3 h-3 text-muted-foreground" />
-                      <span className="font-mono text-sm">{dep.version}</span>
-                      <span className="text-[10px] text-muted-foreground">
-                        ← {dep.previousVersion}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusIndicator status={dep.status} showLabel />
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-sm">{dep.replicas}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {dep.deployedAt}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-xs">{dep.duration}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-xs text-muted-foreground">
-                      {dep.deployedBy}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon-sm">
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm">
-                        <RotateCcw className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm">
-                        <MoreVertical className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </td>
+          {/* Desktop table */}
+          <div className="hidden md:block">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  {[
+                    "Application",
+                    "Version",
+                    "Status",
+                    "Replicas",
+                    "Deployed",
+                    "Duration",
+                    "Deployed By",
+                    "Actions",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className={`text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4 ${
+                        h === "Actions" ? "text-right" : ""
+                      }`}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {deployments.map((dep) => (
+                  <tr key={dep.id} className="data-table-row">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <Rocket className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-mono text-sm">{dep.app}</span>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <GitBranch className="w-3 h-3 text-muted-foreground" />
+                        <span className="font-mono text-sm">{dep.version}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          ← {dep.previousVersion}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <StatusIndicator status={dep.status} showLabel />
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-sm">
+                      {dep.replicas}
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">
+                      {dep.deployedAt}
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-xs">
+                      {dep.duration}
+                    </td>
+
+                    <td className="py-3 px-4 text-xs text-muted-foreground">
+                      {dep.deployedBy}
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon-sm">
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon-sm">
+                          <RotateCcw className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon-sm">
+                          <MoreVertical className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-border">
+            {deployments.map((dep) => (
+              <div key={dep.id} className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Rocket className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-mono text-sm">{dep.app}</span>
+                  </div>
+                  <StatusIndicator status={dep.status} />
+                </div>
+
+                <div className="flex items-center gap-2 text-xs">
+                  <GitBranch className="w-3 h-3 text-muted-foreground" />
+                  <span className="font-mono">{dep.version}</span>
+                  <span className="text-muted-foreground">
+                    ← {dep.previousVersion}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Replicas</span>
+                    <div className="font-mono">{dep.replicas}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Duration</span>
+                    <div className="font-mono">{dep.duration}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Deployed</span>
+                    <div className="font-mono">{dep.deployedAt}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">By</span>
+                    <div className="truncate">{dep.deployedBy}</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-1 pt-2">
+                  <Button variant="ghost" size="icon-sm">
+                    <Eye className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm">
+                    <RotateCcw className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm">
+                    <MoreVertical className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </DashboardLayout>

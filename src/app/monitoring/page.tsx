@@ -3,7 +3,6 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import {
   LineChart,
   Line,
@@ -14,6 +13,9 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import RadialChart from "@/components/RadialChart";
+import { ArrowDownLeft, ArrowUpRight, Cpu, MemoryStick } from "lucide-react";
 
 const cpuData = [
   { time: "00:00", value: 45 },
@@ -81,14 +83,14 @@ export default function MonitoringPage() {
       subtitle="Resource utilization and metrics"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
               Cluster CPU
             </div>
             <div className="stat-value">68%</div>
-            <MetricBar value={68} max={100} />
+            <Progress value={68} className="w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -97,7 +99,7 @@ export default function MonitoringPage() {
               Cluster Memory
             </div>
             <div className="stat-value">71%</div>
-            <MetricBar value={71} max={100} />
+            <Progress value={71} className="w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -123,16 +125,15 @@ export default function MonitoringPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              CPU Usage
-              <Badge variant="terminal">Last 12 hours</Badge>
+            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+              CPU Usage <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-48">
+            <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={cpuData}>
                   <defs>
@@ -145,12 +146,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="hsl(180, 100%, 50%)"
+                        stopColor="oklch(0.66 0.13 227.70)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(180, 100%, 50%)"
+                        stopColor="oklch(0.66 0.13 227.70)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -169,8 +170,8 @@ export default function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 7%)",
-                      border: "1px solid hsl(0, 0%, 18%)",
+                      backgroundColor: "hsl(0,0%,7%)",
+                      border: "1px solid hsl(0,0%,18%)",
                       borderRadius: "4px",
                       fontSize: "12px",
                     }}
@@ -178,7 +179,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(180, 100%, 50%)"
+                    stroke="oklch(0.66 0.13 227.70)"
                     strokeWidth={2}
                     fill="url(#cpuGradient)"
                   />
@@ -190,13 +191,12 @@ export default function MonitoringPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between">
-              Memory Usage
-              <Badge variant="terminal">Last 12 hours</Badge>
+            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+              Memory Usage <Badge variant="outline">Last 12 hours</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-48">
+            <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={memoryData}>
                   <defs>
@@ -209,12 +209,12 @@ export default function MonitoringPage() {
                     >
                       <stop
                         offset="5%"
-                        stopColor="hsl(142, 70%, 45%)"
+                        stopColor="oklch(0.70 0.15 159.83)"
                         stopOpacity={0.3}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(142, 70%, 45%)"
+                        stopColor="oklch(0.70 0.15 159.83)"
                         stopOpacity={0}
                       />
                     </linearGradient>
@@ -233,8 +233,8 @@ export default function MonitoringPage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(0, 0%, 7%)",
-                      border: "1px solid hsl(0, 0%, 18%)",
+                      backgroundColor: "hsl(0,0%,7%)",
+                      border: "1px solid hsl(0,0%,18%)",
                       borderRadius: "4px",
                       fontSize: "12px",
                     }}
@@ -242,7 +242,7 @@ export default function MonitoringPage() {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="hsl(142, 70%, 45%)"
+                    stroke="oklch(0.70 0.15 159.83)"
                     strokeWidth={2}
                     fill="url(#memoryGradient)"
                   />
@@ -256,13 +256,12 @@ export default function MonitoringPage() {
       {/* Network Chart */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between">
-            Network I/O
-            <Badge variant="terminal">Last 12 hours</Badge>
+          <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+            Network I/O <Badge variant="outline">Last 12 hours</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-48">
+          <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={networkData}>
                 <XAxis
@@ -278,8 +277,8 @@ export default function MonitoringPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(0, 0%, 7%)",
-                    border: "1px solid hsl(0, 0%, 18%)",
+                    backgroundColor: "hsl(0,0%,7%)",
+                    border: "1px solid hsl(0,0%,18%)",
                     borderRadius: "4px",
                     fontSize: "12px",
                   }}
@@ -287,7 +286,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="in"
-                  stroke="hsl(180, 100%, 50%)"
+                  stroke="oklch(0.80 0.10 100.65)"
                   strokeWidth={2}
                   dot={false}
                   name="Inbound"
@@ -295,7 +294,7 @@ export default function MonitoringPage() {
                 <Line
                   type="monotone"
                   dataKey="out"
-                  stroke="hsl(38, 92%, 50%)"
+                  stroke="oklch(0.60 0.15 300.14)"
                   strokeWidth={2}
                   dot={false}
                   name="Outbound"
@@ -303,7 +302,7 @@ export default function MonitoringPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-6 mt-2">
+          <div className="flex flex-wrap gap-6 mt-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-0.5 bg-primary" />
               <span className="text-xs text-muted-foreground">Inbound</span>
@@ -322,7 +321,7 @@ export default function MonitoringPage() {
           <CardTitle>Container Metrics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {containerMetrics.map((container) => (
               <div
                 key={container.name}
@@ -337,14 +336,14 @@ export default function MonitoringPage() {
                       <span>CPU</span>
                       <span>{container.cpu}%</span>
                     </div>
-                    <MetricBar value={container.cpu} max={100} />
+                    <Progress value={container.cpu} className="w-full" />
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>Memory</span>
                       <span>{container.memory}%</span>
                     </div>
-                    <MetricBar value={container.memory} max={100} />
+                    <Progress value={container.memory} className="w-full" />
                   </div>
                   <div className="flex justify-between text-[10px] pt-1 border-t border-border">
                     <span className="text-muted-foreground">Network</span>

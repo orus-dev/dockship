@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
-import { MetricBar } from "@/components/dashboard/MetricBar";
 import { Server, Plus, Settings, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const nodes = [
   {
@@ -56,29 +56,26 @@ const nodes = [
 export default function NodesPage() {
   return (
     <DashboardLayout title="Nodes" subtitle="Cluster node management">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Badge variant="terminal">{nodes.length} nodes</Badge>
-          <Badge variant="success">
-            {nodes.filter((n) => n.status === "running").length} online
-          </Badge>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge>{nodes.length} nodes</Badge>
+          <Badge>{nodes.filter((n) => n.status === "running").length} online</Badge>
         </div>
         <Button size="sm" className="gap-2">
-          <Plus className="w-4 h-4" />
-          Add Node
+          <Plus className="w-4 h-4" /> Add Node
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="flex flex-col gap-4">
         {nodes.map((node) => (
           <Card key={node.id}>
-            <CardHeader className="flex flex-row items-start justify-between pb-2">
-              <div className="flex items-center gap-3">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between pb-2 gap-2 sm:gap-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="w-10 h-10 bg-secondary flex items-center justify-center">
                   <Server className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <StatusIndicator status={node.status} />
                     <CardTitle className="font-mono">{node.name}</CardTitle>
                   </div>
@@ -87,7 +84,7 @@ export default function NodesPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
                 {node.labels.map((label) => (
                   <Badge key={label} variant="outline" className="text-[10px]">
                     {label}
@@ -102,12 +99,10 @@ export default function NodesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
                 {/* System Info */}
-                <div className="border-r border-border pr-6">
-                  <div className="text-xs text-muted-foreground mb-2">
-                    System
-                  </div>
+                <div className="border-b sm:border-b-0 sm:border-r border-border pb-2 sm:pb-0 pr-0 sm:pr-6">
+                  <div className="text-xs text-muted-foreground mb-2">System</div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">OS</span>
@@ -130,18 +125,14 @@ export default function NodesPage() {
                     CPU ({node.cpu.cores} cores)
                   </div>
                   <div className="stat-value mb-2">{node.cpu.usage}%</div>
-                  <MetricBar value={node.cpu.usage} max={100} />
+                  <Progress value={node.cpu.usage} className="w-full" />
                 </div>
 
                 {/* Memory */}
                 <div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Memory
-                  </div>
-                  <div className="stat-value mb-2">
-                    {node.memory.percentage}%
-                  </div>
-                  <MetricBar value={node.memory.percentage} max={100} />
+                  <div className="text-xs text-muted-foreground mb-2">Memory</div>
+                  <div className="stat-value mb-2">{node.memory.percentage}%</div>
+                  <Progress value={node.memory.percentage} className="w-full" />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
                     {node.memory.used} / {node.memory.total}
                   </div>
@@ -151,7 +142,7 @@ export default function NodesPage() {
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">Disk</div>
                   <div className="stat-value mb-2">{node.disk.percentage}%</div>
-                  <MetricBar value={node.disk.percentage} max={100} />
+                  <Progress value={node.disk.percentage} className="w-full" />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
                     {node.disk.used} / {node.disk.total}
                   </div>
@@ -159,22 +150,12 @@ export default function NodesPage() {
 
                 {/* Quick Actions */}
                 <div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Quick Actions
-                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Quick Actions</div>
                   <div className="space-y-1">
-                    <Button
-                      variant="terminal"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
+                    <Button size="sm" className="w-full justify-start">
                       SSH Connect
                     </Button>
-                    <Button
-                      variant="terminal"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
+                    <Button size="sm" className="w-full justify-start">
                       View Logs
                     </Button>
                   </div>

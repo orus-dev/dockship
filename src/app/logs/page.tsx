@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pause, Play, Download, Filter, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const logEntries = [
   {
@@ -136,19 +137,18 @@ export default function LogsPage() {
     "all"
   );
 
-  const filteredLogs = logEntries.filter((log) => {
-    if (filter === "all") return true;
-    return log.level === filter;
-  });
+  const filteredLogs = logEntries.filter((log) =>
+    filter === "all" ? true : log.level === filter
+  );
 
   const getLevelClass = (level: string) => {
     switch (level) {
       case "info":
-        return "log-info";
+        return "text-blue-400";
       case "warn":
-        return "log-warn";
+        return "text-yellow-300";
       case "error":
-        return "log-error";
+        return "text-destructive";
       default:
         return "";
     }
@@ -156,8 +156,10 @@ export default function LogsPage() {
 
   return (
     <DashboardLayout title="Logs" subtitle="Real-time log aggregation">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      {/* Toolbar */}
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={filter === "all" ? "secondary" : "ghost"}
             size="sm"
@@ -193,16 +195,20 @@ export default function LogsPage() {
             Error
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2">
             <Filter className="w-4 h-4" />
-            Advanced Filter
+            <span className="hidden sm:inline">Advanced Filter</span>
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Download className="w-4 h-4" />
-            Export
+            <span className="hidden sm:inline">Export</span>
           </Button>
-          <div className="w-px h-6 bg-border" />
+
+          <div className="hidden md:block w-px h-6 bg-border" />
+
           <Button
             variant={isPaused ? "secondary" : "outline"}
             size="sm"
@@ -224,13 +230,14 @@ export default function LogsPage() {
         </div>
       </div>
 
-      <Card variant="terminal" className="h-[calc(100vh-240px)]">
+      {/* Log Card */}
+      <Card className="h-[calc(100vh-240px)]">
         <CardHeader className="flex flex-row items-center justify-between py-2 px-4 border-b border-border">
           <CardTitle className="text-xs text-muted-foreground uppercase tracking-wider">
             Log Stream
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Badge variant="terminal">{filteredLogs.length} entries</Badge>
+            <Badge>{filteredLogs.length} entries</Badge>
             {!isPaused && (
               <div className="flex items-center gap-1 text-xs text-success">
                 <RefreshCw className="w-3 h-3 animate-spin" />
@@ -239,24 +246,38 @@ export default function LogsPage() {
             )}
           </div>
         </CardHeader>
+
         <CardContent className="p-0 overflow-auto h-[calc(100%-48px)]">
-          <div className="font-mono text-xs">
+          <div className="font-mono text-xs px-3 md:px-6 space-y-2 md:space-y-0">
             {filteredLogs.map((log, index) => (
-              <div key={index} className="log-line flex">
-                <span className="log-timestamp whitespace-nowrap">
+              <div
+                key={index}
+                className="flex flex-col gap-1 md:flex-row md:gap-0"
+              >
+                {/* Timestamp */}
+                <span className="text-gray-400 whitespace-nowrap md:mr-3">
                   {log.timestamp}
                 </span>
+
+                {/* Level */}
                 <span
-                  className={`uppercase w-12 flex-shrink-0 ${getLevelClass(
-                    log.level
-                  )}`}
+                  className={cn(
+                    "uppercase md:w-12 md:shrink-0 md:mx-3",
+                    getLevelClass(log.level)
+                  )}
                 >
                   [{log.level}]
                 </span>
-                <span className="text-muted-foreground w-40 flex-shrink-0 truncate">
+
+                {/* Source */}
+                <span className="text-muted-foreground md:w-40 md:shrink-0 md:truncate">
                   {log.source}
                 </span>
-                <span className="text-foreground">{log.message}</span>
+
+                {/* Message */}
+                <span className="text-foreground wrap-break-words">
+                  {log.message}
+                </span>
               </div>
             ))}
           </div>
