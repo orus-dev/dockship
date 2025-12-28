@@ -5,12 +5,11 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
-import { getMetrics } from "@/core/client/metrics";
+import { getMetrics } from "@/core/metrics";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
-import { Node, NodeLiveData } from "@/lib/types";
-import { getLiveNodes } from "@/core/client/node";
+import { getLiveNodes } from "@/core/node";
 import { average } from "@/lib/format";
 
 const containerMetrics = [
@@ -102,19 +101,23 @@ export default function MonitoringPage() {
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Cluster CPU
+                CPU usage
               </div>
-              <div className="stat-value">68%</div>
-              <Progress value={68} className="w-full" />
+              <div className="stat-value">
+                {liveData?.cpuUsage?.toFixed(0) || 0}%
+              </div>
+              <Progress value={liveData?.cpuUsage} className="w-full" />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Cluster Memory
+                Memory usage
               </div>
-              <div className="stat-value">71%</div>
-              <Progress value={71} className="w-full" />
+              <div className="stat-value">
+                {liveData?.ramUsage?.toFixed(0) || 0}%
+              </div>
+              <Progress value={liveData?.ramUsage} className="w-full" />
             </CardContent>
           </Card>
           <Card>

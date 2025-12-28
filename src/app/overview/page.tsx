@@ -16,9 +16,12 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { getLiveNodes } from "@/core/client/node";
+import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
 import { Node, NodeLiveData } from "@/lib/types";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { getSession } from "@/core/auth/session";
 
 const recentDeployments = [
   {
@@ -99,6 +102,7 @@ export default function OverviewPage() {
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
+
     return () => clearInterval(interval);
   }, []);
 

@@ -1,11 +1,12 @@
 "use server";
 
-import Docker from "dockerode";
+import axios from "axios";
+import { Node } from "@/lib/types";
 
-const docker = new Docker();
-
-export async function getDocker() {
-  const version = await docker.version();
-  const containers = await docker.listContainers();
-  return { version, containers };
+export async function getDocker(node: Node): Promise<{ version: string }> {
+  return await (
+    await axios.get(`http://${node.ip}:3000/api/get-docker`, {
+      headers: { Authorization: `ApiKey ${node.key}` },
+    })
+  ).data;
 }
