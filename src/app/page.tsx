@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import redirectAuth from "@/core/auth/redirect";
+import { GithubIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function LogIn() {
@@ -22,11 +23,10 @@ export default function LogIn() {
               height={80}
             />
           </CardTitle>
-          {/* <CardTitle className="text-2xl mx-auto">Log in</CardTitle> */}
         </CardHeader>
         <CardContent>
           <Button className="w-full" onClick={withGithub}>
-            Continue with github
+            <GithubIcon /> Continue with GitHub
           </Button>
         </CardContent>
       </Card>
