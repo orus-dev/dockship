@@ -25,19 +25,19 @@ export default function RadialChart({
   const chartData = [{ value, fill: "var(--color-chart-1)" }];
 
   return (
-    <ChartContainer config={chartConfig} className="size-30">
+    <ChartContainer config={chartConfig} className="w-full aspect-square">
       <RadialBarChart
         data={chartData}
-        startAngle={-50}
-        endAngle={(value / 100) * 230}
-        innerRadius="65%"
-        outerRadius="100%"
+        startAngle={230 - 360 * (value / 100)}
+        endAngle={230}
+        innerRadius={80}
+        outerRadius={110}
       >
         <PolarGrid
           gridType="circle"
           radialLines={false}
           stroke="none"
-          className=""
+          className="first:fill-muted last:fill-background"
           polarRadius={[86, 74]}
         />
         <RadialBar dataKey="value" background cornerRadius={10} />
@@ -57,7 +57,7 @@ export default function RadialChart({
                       y={viewBox.cy}
                       className="fill-foreground text-xl font-bold"
                     >
-                      {chartData[0].value.toLocaleString()}
+                      {chartData[0].value.toFixed(1)}%
                     </tspan>
                     <tspan
                       x={viewBox.cx}

@@ -6,6 +6,6 @@ const docker = new Docker();
 
 export async function getDocker() {
   const version = await docker.version();
-  console.log("Docker version:", version);
-  return version;
+  const containers = await docker.listContainers();
+  return { version, containers };
 }

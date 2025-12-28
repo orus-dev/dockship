@@ -4,71 +4,70 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import { Server, Plus, Settings, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Docker, Node, NodeLiveData } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { getDockerNode, getLiveNodes } from "@/core/client/node";
+import { formatBytes } from "@/lib/format";
+import { setNodes as updateNodes } from "@/core/client/node";
+import AddNode from "@/components/dialogs/AddNode";
 
-const nodes = [
-  {
-    id: "node-01",
-    name: "node-01",
-    hostname: "dockship-node-01.local",
-    ip: "10.0.1.10",
-    os: "Ubuntu 22.04 LTS",
-    docker: "24.0.7",
-    cpu: { cores: 8, usage: 72 },
-    memory: { total: "32 GB", used: "21.8 GB", percentage: 68 },
-    disk: { total: "500 GB", used: "245 GB", percentage: 49 },
-    containers: 8,
-    status: "running" as const,
-    labels: ["production", "primary"],
-  },
-  {
-    id: "node-02",
-    name: "node-02",
-    hostname: "dockship-node-02.local",
-    ip: "10.0.1.11",
-    os: "Ubuntu 22.04 LTS",
-    docker: "24.0.7",
-    cpu: { cores: 8, usage: 45 },
-    memory: { total: "32 GB", used: "16.6 GB", percentage: 52 },
-    disk: { total: "500 GB", used: "178 GB", percentage: 36 },
-    containers: 6,
-    status: "running" as const,
-    labels: ["production"],
-  },
-  {
-    id: "node-03",
-    name: "node-03",
-    hostname: "dockship-node-03.local",
-    ip: "10.0.1.12",
-    os: "Ubuntu 22.04 LTS",
-    docker: "24.0.7",
-    cpu: { cores: 16, usage: 89 },
-    memory: { total: "64 GB", used: "54.4 GB", percentage: 85 },
-    disk: { total: "1 TB", used: "612 GB", percentage: 61 },
-    containers: 12,
-    status: "running" as const,
-    labels: ["production", "high-memory"],
-  },
-];
+function DiskUsage({ liveData }: NodeLiveData) {
+  const usage = (liveData.disk.used / liveData.disk.size) * 100;
+
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-2">Disk</div>
+      <div className="stat-value mb-2">{usage.toFixed(0)}%</div>
+      <Progress value={usage} className="w-full" />
+      <div className="text-[10px] text-muted-foreground mt-1 font-mono">
+        {formatBytes(liveData.disk.used)} / {formatBytes(liveData.disk.size)}
+      </div>
+    </div>
+  );
+}
 
 export default function NodesPage() {
+  const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
+  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
+
+  useEffect(() => {
+    const fetchNodes = async () => {
+      const nodes = await getLiveNodes();
+      setNodes(nodes);
+    };
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchDocker = async () => {
+      setDockerNodes(await Promise.all(nodes.map(getDockerNode)));
+    };
+    fetchDocker();
+  }, [nodes]);
+
   return (
     <DashboardLayout title="Nodes" subtitle="Cluster node management">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge>{nodes.length} nodes</Badge>
-          <Badge>{nodes.filter((n) => n.status === "running").length} online</Badge>
+          <Badge>
+            {/* {nodes.filter((n) => n.status === "running").length} online */}
+          </Badge>
         </div>
-        <Button size="sm" className="gap-2">
-          <Plus className="w-4 h-4" /> Add Node
-        </Button>
+        <AddNode>
+          <Button size="sm" className="gap-2">
+            <Plus className="w-4 h-4" /> Add Node
+          </Button>
+        </AddNode>
       </div>
 
       <div className="flex flex-col gap-4">
-        {nodes.map((node) => (
-          <Card key={node.id}>
+        {nodes.map((node, i) => (
+          <Card key={i}>
             <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between pb-2 gap-2 sm:gap-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="w-10 h-10 bg-secondary flex items-center justify-center">
@@ -76,11 +75,11 @@ export default function NodesPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <StatusIndicator status={node.status} />
+                    {/* <StatusIndicator status={node.status} /> */}
                     <CardTitle className="font-mono">{node.name}</CardTitle>
                   </div>
                   <div className="text-xs text-muted-foreground font-mono">
-                    {node.hostname} • {node.ip}
+                    {node.ip} • {node.ip}
                   </div>
                 </div>
               </div>
@@ -93,7 +92,15 @@ export default function NodesPage() {
                 <Button variant="ghost" size="icon-sm">
                   <Settings className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon-sm">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={async () => {
+                    const newNodes = nodes.filter((_, index) => index !== i);
+                    setNodes(newNodes);
+                    await updateNodes(newNodes);
+                  }}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -102,7 +109,9 @@ export default function NodesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
                 {/* System Info */}
                 <div className="border-b sm:border-b-0 sm:border-r border-border pb-2 sm:pb-0 pr-0 sm:pr-6">
-                  <div className="text-xs text-muted-foreground mb-2">System</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    System
+                  </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">OS</span>
@@ -110,11 +119,15 @@ export default function NodesPage() {
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Docker</span>
-                      <span className="font-mono">{node.docker}</span>
+                      <span className="font-mono">
+                        {dockerNodes[i]?.version}
+                      </span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Containers</span>
-                      <span className="font-mono">{node.containers}</span>
+                      <span className="font-mono">
+                        {dockerNodes[i]?.containers.length}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -122,35 +135,43 @@ export default function NodesPage() {
                 {/* CPU */}
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">
-                    CPU ({node.cpu.cores} cores)
+                    CPU ({node.liveData.cpu.cores} cores)
                   </div>
-                  <div className="stat-value mb-2">{node.cpu.usage}%</div>
-                  <Progress value={node.cpu.usage} className="w-full" />
+                  <div className="stat-value mb-2">
+                    {node.liveData.cpu.usage.toFixed(0)}%
+                  </div>
+                  <Progress
+                    value={node.liveData.cpu.usage}
+                    className="w-full"
+                  />
                 </div>
 
                 {/* Memory */}
                 <div>
-                  <div className="text-xs text-muted-foreground mb-2">Memory</div>
-                  <div className="stat-value mb-2">{node.memory.percentage}%</div>
-                  <Progress value={node.memory.percentage} className="w-full" />
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Memory
+                  </div>
+                  <div className="stat-value mb-2">
+                    {node.liveData.memory.usage.toFixed(0)}%
+                  </div>
+                  <Progress
+                    value={node.liveData.memory.usage}
+                    className="w-full"
+                  />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
-                    {node.memory.used} / {node.memory.total}
+                    {formatBytes(node.liveData.memory.used)} /{" "}
+                    {formatBytes(node.liveData.memory.total)}
                   </div>
                 </div>
 
                 {/* Disk */}
-                <div>
-                  <div className="text-xs text-muted-foreground mb-2">Disk</div>
-                  <div className="stat-value mb-2">{node.disk.percentage}%</div>
-                  <Progress value={node.disk.percentage} className="w-full" />
-                  <div className="text-[10px] text-muted-foreground mt-1 font-mono">
-                    {node.disk.used} / {node.disk.total}
-                  </div>
-                </div>
+                <DiskUsage liveData={node.liveData} />
 
                 {/* Quick Actions */}
                 <div>
-                  <div className="text-xs text-muted-foreground mb-2">Quick Actions</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Quick Actions
+                  </div>
                   <div className="space-y-1">
                     <Button size="sm" className="w-full justify-start">
                       SSH Connect

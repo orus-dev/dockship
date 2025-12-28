@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import { getLiveNodes } from "@/core/client/node";
+import { useEffect, useState } from "react";
+import { Node, NodeLiveData } from "@/lib/types";
 
 const recentDeployments = [
   {
@@ -84,36 +87,21 @@ const applications = [
     memory: 48,
     status: "pending" as const,
   },
-];
-
-const nodes = [
-  {
-    name: "node-01",
-    ip: "10.0.1.10",
-    cpu: 72,
-    memory: 68,
-    containers: 8,
-    status: "running" as const,
-  },
-  {
-    name: "node-02",
-    ip: "10.0.1.11",
-    cpu: 45,
-    memory: 52,
-    containers: 6,
-    status: "running" as const,
-  },
-  {
-    name: "node-03",
-    ip: "10.0.1.12",
-    cpu: 89,
-    memory: 85,
-    containers: 12,
-    status: "running" as const,
-  },
-];
+].slice(-5);
 
 export default function OverviewPage() {
+  const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
+
+  useEffect(() => {
+    const fetchNodes = async () => {
+      const nodes = await getLiveNodes();
+      setNodes(nodes);
+    };
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <DashboardLayout title="Overview" subtitle="System status and metrics">
       {/* Stats Grid */}
@@ -239,14 +227,11 @@ export default function OverviewPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-75">
-            {nodes.map((node) => (
-              <div
-                key={node.name}
-                className="border border-border p-4 bg-secondary/30"
-              >
+            {nodes.map((node, i) => (
+              <div key={i} className="border border-border p-4 bg-secondary/30">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
-                    <StatusIndicator status={node.status} />
+                    <StatusIndicator status={"running"} />
                     <span className="font-mono text-sm">{node.name}</span>
                   </div>
                   <span className="text-xs text-muted-foreground font-mono">
@@ -256,20 +241,27 @@ export default function OverviewPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">CPU</span>
-                    <span className="font-mono">{node.cpu}%</span>
-                  </div>
-                  <Progress value={node.cpu} className="[&>div]:bg-chart-1" />
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Memory</span>
-                    <span className="font-mono">{node.memory}%</span>
+                    <span className="font-mono">
+                      {node.liveData.cpu.usage.toFixed(0)}%
+                    </span>
                   </div>
                   <Progress
-                    value={node.memory}
+                    value={node.liveData.cpu.usage}
+                    className="[&>div]:bg-chart-1"
+                  />
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Memory</span>
+                    <span className="font-mono">
+                      {node.liveData.memory.usage.toFixed(0)}%
+                    </span>
+                  </div>
+                  <Progress
+                    value={node.liveData.memory.usage}
                     className="w-full [&>div]:bg-chart-3"
                   />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
                     <span className="text-muted-foreground">Containers</span>
-                    <span className="font-mono">{node.containers}</span>
+                    <span className="font-mono">{6}</span>
                   </div>
                 </div>
               </div>

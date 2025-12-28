@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
+import { getDocker } from "@/core/docker";
+import { Docker } from "@/lib/types";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -12,8 +14,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const docker = await getDocker();
+
   return NextResponse.json({
     message: "ok",
-    containers: [],
-  });
+    version: docker.version.Version,
+    containers: docker.containers,
+  } as Docker);
 }
