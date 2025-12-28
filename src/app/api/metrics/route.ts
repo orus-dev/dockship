@@ -25,6 +25,13 @@ const usageHours: (Usage & { time: string })[] = new Array(12).fill({
 
 var hr = 0;
 
+function getTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
 setInterval(async () => {
   const [mem, load, network] = await Promise.all([
     si.mem(),
@@ -32,21 +39,19 @@ setInterval(async () => {
     si.networkStats(),
   ]);
 
-  usageSecs.push({
+  const sec = {
     cpu: load.currentLoad,
     memory: ((mem.total - mem.available) / mem.total) * 100,
     in: average(network, (n) => n.rx_bytes),
     out: average(network, (n) => n.tx_bytes),
-  });
+  };
+  usageSecs.push(sec);
 
-  if (usageSecs.length >= 60) {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const time = `${hours}:${minutes}`;
-
+  if (usageSecs.length === 10) {
+    usageHours[hr] = { time: getTime(), ...sec };
+  } else if (usageSecs.length >= 60) {
     usageMins.push({
-      time,
+      time: getTime(),
       cpu: average(usageSecs, (s) => s.cpu),
       memory: average(usageSecs, (s) => s.memory),
       in: average(usageSecs, (s) => s.in),
@@ -54,6 +59,7 @@ setInterval(async () => {
     });
 
     if (usageMins.length >= 60) {
+      const time = getTime();
       if (hr >= 12) {
         usageHours.shift();
         usageHours.push({
