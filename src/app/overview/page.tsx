@@ -19,6 +19,9 @@ import Link from "next/link";
 import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
 import { Node, NodeLiveData } from "@/lib/types";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { getSession } from "@/core/auth/session";
 
 const recentDeployments = [
   {
@@ -99,6 +102,29 @@ export default function OverviewPage() {
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
+
+    const test = async () => {
+      const sessionToken = await getSession();
+      console.log(sessionToken);
+      // console.log(
+      //   (
+      //     await axios.get("https://api.github.com/user/repos", {
+      //       headers: { Authorization: `Bearer ${sessionToken}` },
+      //     })
+      //   ).data
+      // );
+
+      // console.log(
+      //   (
+      //     await axios.get("https://api.github.com/orgs/orus-dev/repos", {
+      //       headers: { Authorization: `Bearer ${sessionToken}` },
+      //     })
+      //   ).data
+      // );
+    };
+
+    test();
+
     return () => clearInterval(interval);
   }, []);
 

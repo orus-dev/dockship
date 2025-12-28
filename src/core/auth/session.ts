@@ -1,7 +1,14 @@
-import { getIronSession } from "iron-session";
+"use server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export const session = getIronSession({
-  password: process.env.SESSION_PASSWORD!,
-  cookieName: "nextjs_oauth_session",
-  secure: process.env.NODE_ENV === "production",
-});
+export async function getSession() {
+  const c = await cookies();
+  const accessToken = c.get("github_access")?.value;
+
+  if (!accessToken) {
+    redirect("/");
+  }
+
+  return accessToken;
+}
