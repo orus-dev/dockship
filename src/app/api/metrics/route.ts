@@ -84,7 +84,7 @@ setInterval(async () => {
 
     usageSecs.splice(0, usageSecs.length);
   }
-}, 1);
+}, 1000);
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
