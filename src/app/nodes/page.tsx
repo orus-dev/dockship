@@ -8,9 +8,9 @@ import { Server, Plus, Settings, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { getDockerNode, getLiveNodes } from "@/core/client/node";
+import { getDockerNode, getLiveNodes } from "@/core/node";
 import { formatBytes } from "@/lib/format";
-import { setNodes as updateNodes } from "@/core/client/node";
+import { setNodes as updateNodes } from "@/core/node";
 import AddNode from "@/components/dialogs/AddNode";
 
 function DiskUsage({ liveData }: NodeLiveData) {

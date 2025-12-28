@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { getLiveNodes } from "@/core/client/node";
+import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
 import { Node, NodeLiveData } from "@/lib/types";
 
