@@ -1,52 +1,41 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-} from "recharts";
 import { Progress } from "@/components/ui/progress";
-import RadialChart from "@/components/RadialChart";
-import { ArrowDownLeft, ArrowUpRight, Cpu, MemoryStick } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type ChartConfig } from "@/components/ui/chart";
+import GradientAreaChart from "@/components/GradientAreaChart";
 
 const cpuData = [
-  { time: "00:00", value: 45 },
-  { time: "01:00", value: 52 },
-  { time: "02:00", value: 38 },
-  { time: "03:00", value: 42 },
-  { time: "04:00", value: 35 },
-  { time: "05:00", value: 48 },
-  { time: "06:00", value: 55 },
-  { time: "07:00", value: 62 },
-  { time: "08:00", value: 78 },
-  { time: "09:00", value: 85 },
-  { time: "10:00", value: 72 },
-  { time: "11:00", value: 68 },
-  { time: "12:00", value: 75 },
+  { time: "00:00", cpu: 45 },
+  { time: "01:00", cpu: 52 },
+  { time: "02:00", cpu: 38 },
+  { time: "03:00", cpu: 42 },
+  { time: "04:00", cpu: 35 },
+  { time: "05:00", cpu: 48 },
+  { time: "06:00", cpu: 55 },
+  { time: "07:00", cpu: 62 },
+  { time: "08:00", cpu: 78 },
+  { time: "09:00", cpu: 85 },
+  { time: "10:00", cpu: 72 },
+  { time: "11:00", cpu: 68 },
+  { time: "12:00", cpu: 75 },
 ];
 
 const memoryData = [
-  { time: "00:00", value: 62 },
-  { time: "01:00", value: 64 },
-  { time: "02:00", value: 58 },
-  { time: "03:00", value: 61 },
-  { time: "04:00", value: 59 },
-  { time: "05:00", value: 63 },
-  { time: "06:00", value: 67 },
-  { time: "07:00", value: 72 },
-  { time: "08:00", value: 78 },
-  { time: "09:00", value: 82 },
-  { time: "10:00", value: 76 },
-  { time: "11:00", value: 74 },
-  { time: "12:00", value: 71 },
+  { time: "00:00", memory: 62 },
+  { time: "01:00", memory: 64 },
+  { time: "02:00", memory: 58 },
+  { time: "03:00", memory: 61 },
+  { time: "04:00", memory: 59 },
+  { time: "05:00", memory: 63 },
+  { time: "06:00", memory: 67 },
+  { time: "07:00", memory: 72 },
+  { time: "08:00", memory: 78 },
+  { time: "09:00", memory: 82 },
+  { time: "10:00", memory: 76 },
+  { time: "11:00", memory: 74 },
+  { time: "12:00", memory: 71 },
 ];
 
 const networkData = [
@@ -75,6 +64,19 @@ const containerMetrics = [
   { name: "redis-cache-1", cpu: 12, memory: 34, network: "1.8 MB/s" },
   { name: "worker-queue-1", cpu: 55, memory: 48, network: "5.6 MB/s" },
 ];
+
+const cpuChartConfig = {
+  cpu: { label: "CPU Usage", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+const memoryChartConfig = {
+  memory: { label: "RAM Usage", color: "var(--chart-3)" },
+} satisfies ChartConfig;
+
+const networkChartConfig = {
+  in: { label: "Inbound", color: "var(--chart-2)" },
+  out: { label: "Outbound", color: "var(--chart-4)" },
+} satisfies ChartConfig;
 
 export default function MonitoringPage() {
   return (
@@ -124,196 +126,27 @@ export default function MonitoringPage() {
         </Card>
       </div>
 
-      {/* Charts */}
+      {/* CPU & Memory Charts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
-              CPU Usage <Badge variant="outline">Last 12 hours</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-48 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={cpuData}>
-                  <defs>
-                    <linearGradient
-                      id="cpuGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--chart-1)"
-                        stopOpacity={0.3}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--chart-1)"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="time"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                    domain={[0, 100]}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(0,0%,7%)",
-                      border: "1px solid hsl(0,0%,18%)",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="var(--chart-1)"
-                    strokeWidth={2}
-                    fill="url(#cpuGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
-              Memory Usage <Badge variant="outline">Last 12 hours</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-48 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={memoryData}>
-                  <defs>
-                    <linearGradient
-                      id="memoryGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--chart-3)"
-                        stopOpacity={0.3}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--chart-3)"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="time"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                    domain={[0, 100]}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(0,0%,7%)",
-                      border: "1px solid hsl(0,0%,18%)",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="var(--chart-3)"
-                    strokeWidth={2}
-                    fill="url(#memoryGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <GradientAreaChart
+          title="CPU Usage"
+          data={cpuData}
+          config={cpuChartConfig}
+        />
+        <GradientAreaChart
+          title="Memory Usage"
+          data={memoryData}
+          config={memoryChartConfig}
+        />
       </div>
 
-      {/* Network Chart */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between flex-wrap gap-2">
-            Network I/O <Badge variant="outline">Last 12 hours</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-48 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={networkData}>
-                <XAxis
-                  dataKey="time"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(0, 0%, 55%)", fontSize: 10 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(0,0%,7%)",
-                    border: "1px solid hsl(0,0%,18%)",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="in"
-                  stroke="var(--chart-2)"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Inbound"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="out"
-                  stroke="var(--chart-4)"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Outbound"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-wrap gap-6 mt-2">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-0.5 bg-primary" />
-              <span className="text-xs text-muted-foreground">Inbound</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-0.5 bg-warning" />
-              <span className="text-xs text-muted-foreground">Outbound</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <GradientAreaChart
+          title="Network I/O"
+          data={networkData}
+          config={networkChartConfig}
+        />
+      </div>
 
       {/* Container Metrics */}
       <Card>
