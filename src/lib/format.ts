@@ -9,3 +9,9 @@ export function formatBytes(bytes: number, decimals = 2) {
     sizes[i]
   }`;
 }
+
+export function average<T>(values: Array<T>, p: (v: T) => number) {
+  return values.length > 0
+    ? values.reduce((sum, value) => sum + p(value), 0) / values.length
+    : 0;
+}

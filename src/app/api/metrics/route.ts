@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
 import si from "systeminformation";
-
-function average<T>(values: Array<T>, p: (v: T) => number) {
-  return values.length > 0
-    ? values.reduce((sum, value) => sum + p(value), 0) / values.length
-    : 0;
-}
+import { average } from "@/lib/format";
 
 type Usage = {
   cpu: number;

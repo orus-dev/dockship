@@ -7,6 +7,11 @@ import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
 import { getMetrics } from "@/core/client/metrics";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import RadialChart from "@/components/RadialChart";
+import { Node, NodeLiveData } from "@/lib/types";
+import { getLiveNodes } from "@/core/client/node";
+import { average } from "@/lib/format";
 
 const containerMetrics = [
   { name: "api-gateway-1", cpu: 45, memory: 62, network: "12.4 MB/s" },
@@ -42,6 +47,24 @@ export default function MonitoringPage() {
       out: number;
     }[]
   >([]);
+  const isMobile = useIsMobile();
+  const [liveData, setLiveData] = useState<{
+    cpuUsage: number;
+    ramUsage: number;
+  }>();
+
+  useEffect(() => {
+    const fetchNodes = async () => {
+      const nodes = await getLiveNodes();
+      setLiveData({
+        cpuUsage: average(nodes, (n) => n.liveData.cpu.usage),
+        ramUsage: average(nodes, (n) => n.liveData.memory.usage),
+      });
+    };
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     async function fetchMetrics() {
@@ -61,46 +84,61 @@ export default function MonitoringPage() {
       subtitle="Resource utilization and metrics"
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              Cluster CPU
-            </div>
-            <div className="stat-value">68%</div>
-            <Progress value={68} className="w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              Cluster Memory
-            </div>
-            <div className="stat-value">71%</div>
-            <Progress value={71} className="w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              Network In
-            </div>
-            <div className="stat-value">38 MB/s</div>
-            <div className="text-xs text-success mt-1">↑ 12% from avg</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-              Network Out
-            </div>
-            <div className="stat-value">28 MB/s</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              ↓ 5% from avg
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {isMobile ? (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card>
+            <CardContent className="px-4">
+              <RadialChart value={liveData?.cpuUsage || 0}>CPU</RadialChart>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="px-4">
+              <RadialChart value={liveData?.ramUsage || 0}>RAM</RadialChart>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Cluster CPU
+              </div>
+              <div className="stat-value">68%</div>
+              <Progress value={68} className="w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Cluster Memory
+              </div>
+              <div className="stat-value">71%</div>
+              <Progress value={71} className="w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Network In
+              </div>
+              <div className="stat-value">38 MB/s</div>
+              <div className="text-xs text-success mt-1">↑ 12% from avg</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                Network Out
+              </div>
+              <div className="stat-value">28 MB/s</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                ↓ 5% from avg
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* CPU & Memory Charts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
