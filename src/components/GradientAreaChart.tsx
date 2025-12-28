@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, CartesianGrid } from "recharts";
+import { AreaChart, Area, XAxis, CartesianGrid, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -19,10 +19,12 @@ export default function GradientAreaChart({
   title,
   data,
   config,
+  max,
 }: {
   title: string;
   data: any[];
   config: ChartConfig;
+  max?: number;
 }) {
   return (
     <Card>
@@ -40,6 +42,7 @@ export default function GradientAreaChart({
               tickLine={false}
               tickMargin={8}
             />
+            {max && <YAxis domain={[0, max]} width={10} />}
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <defs>
               {Object.entries(config).map(([key, config]) => (

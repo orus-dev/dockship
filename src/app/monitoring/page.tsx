@@ -108,14 +108,17 @@ export default function MonitoringPage() {
           title="CPU Usage"
           data={data}
           config={cpuChartConfig}
+          max={100}
         />
         <GradientAreaChart
           title="Memory Usage"
           data={data}
           config={memoryChartConfig}
+          max={100}
         />
       </div>
 
+      {/* Network Metrics */}
       <div className="mb-6">
         <GradientAreaChart
           title="Network I/O"
