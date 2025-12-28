@@ -45,7 +45,7 @@ export default function GradientAreaChart({
             {max && (
               <YAxis
                 domain={[0, max]}
-                width={10}
+                width={16}
                 axisLine={false}
                 tickLine={false}
               />
