@@ -2,7 +2,7 @@
 
 import {
   Label,
-  PolarAngleAxis,
+  PolarGrid,
   PolarRadiusAxis,
   RadialBar,
   RadialBarChart,
@@ -15,8 +15,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const INNER_RADIUS = 80;
-
 export default function RadialChart({
   value,
   children,
@@ -25,25 +23,22 @@ export default function RadialChart({
   children?: React.ReactNode;
 }) {
   const chartData = [{ value, fill: "var(--color-chart-1)" }];
-  const startAngle = 230;
-  const totalSweep = 280;
 
   return (
     <ChartContainer config={chartConfig} className="w-full aspect-square">
       <RadialBarChart
         data={chartData}
-        startAngle={startAngle}
-        endAngle={startAngle - (value / 100) * totalSweep}
-        innerRadius={INNER_RADIUS}
-        outerRadius={INNER_RADIUS + 30}
+        startAngle={230 - 360 * (value / 100)}
+        endAngle={230}
+        innerRadius={80}
+        outerRadius={110}
       >
-        <PolarAngleAxis
-          type="number"
-          domain={[0, 100]}
-          tick={false}
-          tickLine={false}
-          axisLine={false}
-          ticks={[]}
+        <PolarGrid
+          gridType="circle"
+          radialLines={false}
+          stroke="none"
+          className="first:fill-muted last:fill-background"
+          polarRadius={[86, 74]}
         />
         <RadialBar dataKey="value" background cornerRadius={10} />
         <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
