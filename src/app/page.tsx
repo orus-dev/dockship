@@ -2,16 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import redirectAuth from "@/core/auth/redirect";
 import Image from "next/image";
-import { useState } from "react";
 
 export default function LogIn() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  const logIn = async () => {};
+  const withGithub = () => {
+    redirectAuth();
+  };
 
   return (
     <div className="w-full h-svh flex items-center">
@@ -25,34 +22,12 @@ export default function LogIn() {
               height={80}
             />
           </CardTitle>
-          <CardTitle className="text-2xl mx-auto">Log in</CardTitle>
+          {/* <CardTitle className="text-2xl mx-auto">Log in</CardTitle> */}
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="key">Username</Label>
-              <Input
-                id="key"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-
-            <div className="grid gap-3">
-              <Label htmlFor="key">Password</Label>
-              <Input
-                id="key"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <Button className="mt-2" onClick={logIn}>
-              Log in
-            </Button>
-          </div>
+          <Button className="w-full" onClick={withGithub}>
+            Continue with github
+          </Button>
         </CardContent>
       </Card>
     </div>
