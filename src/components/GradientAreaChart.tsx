@@ -42,7 +42,14 @@ export default function GradientAreaChart({
               tickLine={false}
               tickMargin={8}
             />
-            {max && <YAxis domain={[0, max]} width={10} />}
+            {max && (
+              <YAxis
+                domain={[0, max]}
+                width={10}
+                axisLine={false}
+                tickLine={false}
+              />
+            )}
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <defs>
               {Object.entries(config).map(([key, config]) => (
