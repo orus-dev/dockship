@@ -5,54 +5,8 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
-
-const cpuData = [
-  { time: "00:00", cpu: 45 },
-  { time: "01:00", cpu: 52 },
-  { time: "02:00", cpu: 38 },
-  { time: "03:00", cpu: 42 },
-  { time: "04:00", cpu: 35 },
-  { time: "05:00", cpu: 48 },
-  { time: "06:00", cpu: 55 },
-  { time: "07:00", cpu: 62 },
-  { time: "08:00", cpu: 78 },
-  { time: "09:00", cpu: 85 },
-  { time: "10:00", cpu: 72 },
-  { time: "11:00", cpu: 68 },
-  { time: "12:00", cpu: 75 },
-];
-
-const memoryData = [
-  { time: "00:00", memory: 62 },
-  { time: "01:00", memory: 64 },
-  { time: "02:00", memory: 58 },
-  { time: "03:00", memory: 61 },
-  { time: "04:00", memory: 59 },
-  { time: "05:00", memory: 63 },
-  { time: "06:00", memory: 67 },
-  { time: "07:00", memory: 72 },
-  { time: "08:00", memory: 78 },
-  { time: "09:00", memory: 82 },
-  { time: "10:00", memory: 76 },
-  { time: "11:00", memory: 74 },
-  { time: "12:00", memory: 71 },
-];
-
-const networkData = [
-  { time: "00:00", in: 12, out: 8 },
-  { time: "01:00", in: 15, out: 10 },
-  { time: "02:00", in: 8, out: 5 },
-  { time: "03:00", in: 10, out: 7 },
-  { time: "04:00", in: 6, out: 4 },
-  { time: "05:00", in: 14, out: 9 },
-  { time: "06:00", in: 22, out: 15 },
-  { time: "07:00", in: 35, out: 28 },
-  { time: "08:00", in: 48, out: 38 },
-  { time: "09:00", in: 52, out: 42 },
-  { time: "10:00", in: 45, out: 35 },
-  { time: "11:00", in: 42, out: 32 },
-  { time: "12:00", in: 38, out: 28 },
-];
+import { getMetrics } from "@/core/client/metrics";
+import { useEffect, useState } from "react";
 
 const containerMetrics = [
   { name: "api-gateway-1", cpu: 45, memory: 62, network: "12.4 MB/s" },
@@ -79,6 +33,28 @@ const networkChartConfig = {
 } satisfies ChartConfig;
 
 export default function MonitoringPage() {
+  const [data, setData] = useState<
+    {
+      time: string;
+      cpu: number;
+      memory: number;
+      in: number;
+      out: number;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    async function fetchMetrics() {
+      setData(await getMetrics());
+    }
+
+    fetchMetrics();
+
+    const i = setInterval(fetchMetrics, 30000);
+
+    return () => clearInterval(i);
+  }, []);
+
   return (
     <DashboardLayout
       title="Monitoring"
@@ -130,12 +106,12 @@ export default function MonitoringPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <GradientAreaChart
           title="CPU Usage"
-          data={cpuData}
+          data={data}
           config={cpuChartConfig}
         />
         <GradientAreaChart
           title="Memory Usage"
-          data={memoryData}
+          data={data}
           config={memoryChartConfig}
         />
       </div>
@@ -143,7 +119,7 @@ export default function MonitoringPage() {
       <div className="mb-6">
         <GradientAreaChart
           title="Network I/O"
-          data={networkData}
+          data={data}
           config={networkChartConfig}
         />
       </div>
