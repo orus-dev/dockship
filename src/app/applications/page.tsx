@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import DeployApplication from "@/components/dialogs/DeployApplication";
 
 const applications = [
   {
@@ -97,10 +98,12 @@ export default function ApplicationsPage() {
           </Badge>
         </div>
 
-        <Button size="sm" className="gap-2 w-full sm:w-auto">
-          <Plus className="w-4 h-4" />
-          Deploy Application
-        </Button>
+        <DeployApplication>
+          <Button size="sm" className="gap-2 w-full sm:w-auto">
+            <Plus className="w-4 h-4" />
+            Deploy Application
+          </Button>
+        </DeployApplication>
       </div>
 
       <div className="space-y-3">
