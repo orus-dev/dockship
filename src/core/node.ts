@@ -1,12 +1,12 @@
 "use server";
 
 import { read, write } from "@/app/api/file";
-import { Docker, Node, NodeLiveData } from "@/lib/types";
+import { Node, NodeLiveData } from "@/lib/types";
 import axios from "axios";
 import { verifySession } from "./auth/session";
 
-export async function getNodes(): Promise<Node[] | undefined> {
-  if (await verifySession()) return;
+export async function getNodes(): Promise<Node[]> {
+  if (await verifySession()) return [];
 
   return await read(() => [], "data", "nodes.json");
 }
@@ -17,10 +17,8 @@ export async function setNodes(nodes: Node[]) {
   await write(nodes, "data", "nodes.json");
 }
 
-export async function getLiveNodes(): Promise<
-  (NodeLiveData & Node)[] | undefined
-> {
-  if (await verifySession()) return;
+export async function getLiveNodes(): Promise<(NodeLiveData & Node)[]> {
+  if (await verifySession()) return [];
 
   const nodes: Node[] = await read(() => [], "data", "nodes.json");
 
@@ -34,17 +32,6 @@ export async function getLiveNodes(): Promise<
       ).data.liveData,
     }))
   );
-}
-
-export async function getDockerNode(node: Node): Promise<Docker | undefined> {
-  if (await verifySession()) return;
-
-  const data = await (
-    await axios.get(`http://${node.ip}:3000/api/get-docker`, {
-      headers: { Authorization: `ApiKey ${node.key}` },
-    })
-  ).data;
-  return { ...node, containers: data.containers, version: data.version };
 }
 
 export async function authNode(ip: string, key: string) {

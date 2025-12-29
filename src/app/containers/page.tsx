@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import { Terminal, MoreVertical, Play, Square, Trash2 } from "lucide-react";
 
 const containers = [
@@ -184,9 +183,7 @@ export default function ContainersPage() {
                       <Badge>{container.node}</Badge>
                     </td>
 
-                    <td className="py-3 px-4">
-                      <StatusIndicator status={container.status} showLabel />
-                    </td>
+                    <td className="py-3 px-4">{/* {container.status} */}</td>
 
                     <td className="py-3 px-4 font-mono text-xs">
                       {container.uptime}
@@ -235,7 +232,7 @@ export default function ContainersPage() {
                     <Terminal className="w-4 h-4 text-muted-foreground" />
                     <span className="font-mono text-sm">{container.name}</span>
                   </div>
-                  <StatusIndicator status={container.status} />
+                  {/* {container.status} */}
                 </div>
 
                 <div className="text-[10px] font-mono text-muted-foreground">

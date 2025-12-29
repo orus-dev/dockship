@@ -56,8 +56,8 @@ export default function MonitoringPage() {
     const fetchNodes = async () => {
       const nodes = await getLiveNodes();
       setLiveData({
-        cpuUsage: average(nodes, (n) => n.liveData.cpu.usage),
-        ramUsage: average(nodes, (n) => n.liveData.memory.usage),
+        cpuUsage: average(nodes, (n) => n.liveData?.cpu.usage || 0),
+        ramUsage: average(nodes, (n) => n.liveData?.memory.usage || 0),
       });
     };
     fetchNodes();

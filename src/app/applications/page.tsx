@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -111,7 +110,7 @@ export default function ApplicationsPage() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:items-center">
                 {/* Status & Name */}
                 <div className="flex items-center gap-3 md:col-span-3">
-                  <StatusIndicator status={app.status} />
+                  {/* {app.status} */}
                   <div className="min-w-0">
                     <div className="font-mono text-sm font-medium">
                       {app.name}

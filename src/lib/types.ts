@@ -11,7 +11,7 @@ export interface Node {
 }
 
 export interface NodeLiveData {
-  liveData: {
+  liveData?: {
     cpu: {
       manufacturer: string;
       brand: string;
