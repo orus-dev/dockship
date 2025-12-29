@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import {
   Rocket,
   RotateCcw,
@@ -153,9 +152,7 @@ export default function DeploymentsPage() {
                       </div>
                     </td>
 
-                    <td className="py-3 px-4">
-                      <StatusIndicator status={dep.status} showLabel />
-                    </td>
+                    <td className="py-3 px-4">{dep.status}</td>
 
                     <td className="py-3 px-4 font-mono text-sm">
                       {dep.replicas}
@@ -201,7 +198,7 @@ export default function DeploymentsPage() {
                     <Rocket className="w-4 h-4 text-muted-foreground" />
                     <span className="font-mono text-sm">{dep.app}</span>
                   </div>
-                  <StatusIndicator status={dep.status} />
+                  {dep.status}
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">

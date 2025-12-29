@@ -8,12 +8,15 @@ import { Server, Plus, Settings, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { getDockerNode, getLiveNodes } from "@/core/node";
+import { getLiveNodes } from "@/core/node";
 import { formatBytes } from "@/lib/format";
 import { setNodes as updateNodes } from "@/core/node";
 import AddNode from "@/components/dialogs/AddNode";
+import { getDocker } from "@/core/docker";
 
 function DiskUsage({ liveData }: NodeLiveData) {
+  if (!liveData) return null;
+
   const usage = (liveData.disk.used / liveData.disk.size) * 100;
 
   return (
@@ -44,7 +47,7 @@ export default function NodesPage() {
 
   useEffect(() => {
     const fetchDocker = async () => {
-      setDockerNodes(await Promise.all(nodes.map(getDockerNode)));
+      setDockerNodes(await getDocker(nodes));
     };
     fetchDocker();
   }, [nodes]);
@@ -54,9 +57,7 @@ export default function NodesPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge>{nodes.length} nodes</Badge>
-          <Badge>
-            {/* {nodes.filter((n) => n.status === "running").length} online */}
-          </Badge>
+          <Badge>{nodes.filter((node) => node.liveData).length} online</Badge>
         </div>
         <AddNode>
           <Button size="sm" className="gap-2">
@@ -75,8 +76,12 @@ export default function NodesPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {/* <StatusIndicator status={node.status} /> */}
                     <CardTitle className="font-mono">{node.name}</CardTitle>
+                    {node.liveData ? (
+                      <span className="size-2 rounded-full bg-chart-2" />
+                    ) : (
+                      <span className="size-2 rounded-full bg-chart-5" />
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground font-mono">
                     {node.ip} • {node.ip}
@@ -135,13 +140,13 @@ export default function NodesPage() {
                 {/* CPU */}
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">
-                    CPU ({node.liveData.cpu.cores} cores)
+                    CPU ({node.liveData?.cpu.cores} cores)
                   </div>
                   <div className="stat-value mb-2">
-                    {node.liveData.cpu.usage.toFixed(0)}%
+                    {node.liveData?.cpu.usage.toFixed(0)}%
                   </div>
                   <Progress
-                    value={node.liveData.cpu.usage}
+                    value={node.liveData?.cpu.usage}
                     className="w-full"
                   />
                 </div>
@@ -152,15 +157,17 @@ export default function NodesPage() {
                     Memory
                   </div>
                   <div className="stat-value mb-2">
-                    {node.liveData.memory.usage.toFixed(0)}%
+                    {node.liveData?.memory.usage.toFixed(0)}%
                   </div>
                   <Progress
-                    value={node.liveData.memory.usage}
+                    value={node.liveData?.memory.usage}
                     className="w-full"
                   />
                   <div className="text-[10px] text-muted-foreground mt-1 font-mono">
-                    {formatBytes(node.liveData.memory.used)} /{" "}
-                    {formatBytes(node.liveData.memory.total)}
+                    {node.liveData &&
+                      formatBytes(node.liveData?.memory.used) +
+                        "/" +
+                        formatBytes(node.liveData?.memory.total)}
                   </div>
                 </div>
 

@@ -5,7 +5,6 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { StatusIndicator } from "@/components/dashboard/StatusIndicator";
 import {
   Box,
   Server,
@@ -18,10 +17,11 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
-import { Node, NodeLiveData } from "@/lib/types";
+import { Docker, Node, NodeLiveData } from "@/lib/types";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { getSession } from "@/core/auth/session";
+import { getDocker } from "@/core/docker";
 
 const recentDeployments = [
   {
@@ -94,11 +94,13 @@ const applications = [
 
 export default function OverviewPage() {
   const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
+  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
       const nodes = await getLiveNodes();
       setNodes(nodes);
+      setDockerNodes(await getDocker(nodes));
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
@@ -118,13 +120,13 @@ export default function OverviewPage() {
         />
         <StatCard
           title="Containers"
-          value="47"
-          subtitle="all healthy"
+          value={dockerNodes.reduce((sum, n) => sum + n.containers.length, 0)}
+          subtitle="running"
           icon={<Container className="w-4 h-4" />}
         />
         <StatCard
           title="Nodes"
-          value="3"
+          value={nodes.filter((n) => n.liveData).length}
           subtitle="online"
           icon={<Server className="w-4 h-4" />}
         />
@@ -178,9 +180,7 @@ export default function OverviewPage() {
                       {app.memory}%
                     </span>
                   </div>
-                  <div className="col-span-2">
-                    <StatusIndicator status={app.status} showLabel />
-                  </div>
+                  <div className="col-span-2">{app.status}</div>
                 </div>
               ))}
             </div>
@@ -205,7 +205,7 @@ export default function OverviewPage() {
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-border last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <StatusIndicator status={dep.status} size="sm" />
+                    {dep.status}
                     <div>
                       <div className="font-mono text-sm">{dep.app}</div>
                       <div className="text-xs text-muted-foreground">
@@ -235,7 +235,11 @@ export default function OverviewPage() {
               <div key={i} className="border border-border p-4 bg-secondary/30">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                   <div className="flex items-center gap-2">
-                    <StatusIndicator status={"running"} />
+                    {node.liveData ? (
+                      <span className="size-2 rounded-full bg-chart-2" />
+                    ) : (
+                      <span className="size-2 rounded-full bg-chart-5" />
+                    )}
                     <span className="font-mono text-sm">{node.name}</span>
                   </div>
                   <span className="text-xs text-muted-foreground font-mono">
@@ -246,21 +250,21 @@ export default function OverviewPage() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">CPU</span>
                     <span className="font-mono">
-                      {node.liveData.cpu.usage.toFixed(0)}%
+                      {node.liveData?.cpu.usage.toFixed(0)}%
                     </span>
                   </div>
                   <Progress
-                    value={node.liveData.cpu.usage}
+                    value={node.liveData?.cpu.usage}
                     className="[&>div]:bg-chart-1"
                   />
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Memory</span>
                     <span className="font-mono">
-                      {node.liveData.memory.usage.toFixed(0)}%
+                      {node.liveData?.memory.usage.toFixed(0)}%
                     </span>
                   </div>
                   <Progress
-                    value={node.liveData.memory.usage}
+                    value={node.liveData?.memory.usage}
                     className="w-full [&>div]:bg-chart-3"
                   />
                   <div className="flex items-center justify-between text-xs pt-2 border-t border-border mt-2">
