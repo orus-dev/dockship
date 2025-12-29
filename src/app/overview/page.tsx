@@ -17,10 +17,11 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
-import { Node, NodeLiveData } from "@/lib/types";
+import { Docker, Node, NodeLiveData } from "@/lib/types";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { getSession } from "@/core/auth/session";
+import { getDocker } from "@/core/docker";
 
 const recentDeployments = [
   {
@@ -93,11 +94,13 @@ const applications = [
 
 export default function OverviewPage() {
   const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
+  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
       const nodes = await getLiveNodes();
       setNodes(nodes);
+      setDockerNodes(await getDocker(nodes));
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
@@ -117,13 +120,13 @@ export default function OverviewPage() {
         />
         <StatCard
           title="Containers"
-          value="47"
-          subtitle="all healthy"
+          value={dockerNodes.reduce((sum, n) => sum + n.containers.length, 0)}
+          subtitle="running"
           icon={<Container className="w-4 h-4" />}
         />
         <StatCard
           title="Nodes"
-          value="3"
+          value={nodes.filter((n) => n.liveData).length}
           subtitle="online"
           icon={<Server className="w-4 h-4" />}
         />

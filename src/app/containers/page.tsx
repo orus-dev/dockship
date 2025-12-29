@@ -5,111 +5,73 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Terminal, MoreVertical, Play, Square, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Docker } from "@/lib/types";
+import { getDocker } from "@/core/docker";
+import { getNodes } from "@/core/node";
+import { ContainerInfo } from "dockerode";
 
-const containers = [
-  {
-    id: "c-a1b2c3d4",
-    name: "api-gateway-1",
-    image: "dockship/api-gateway:v2.4.1",
-    node: "node-01",
-    status: "running" as const,
-    uptime: "3d 12h 45m",
-    cpu: "12%",
-    memory: "256MB / 512MB",
-  },
-  {
-    id: "c-e5f6g7h8",
-    name: "api-gateway-2",
-    image: "dockship/api-gateway:v2.4.1",
-    node: "node-02",
-    status: "running" as const,
-    uptime: "3d 12h 45m",
-    cpu: "18%",
-    memory: "312MB / 512MB",
-  },
-  {
-    id: "c-i9j0k1l2",
-    name: "api-gateway-3",
-    image: "dockship/api-gateway:v2.4.1",
-    node: "node-03",
-    status: "running" as const,
-    uptime: "3d 12h 45m",
-    cpu: "15%",
-    memory: "284MB / 512MB",
-  },
-  {
-    id: "c-m3n4o5p6",
-    name: "auth-service-1",
-    image: "dockship/auth:v1.8.0",
-    node: "node-01",
-    status: "running" as const,
-    uptime: "5d 8h 22m",
-    cpu: "8%",
-    memory: "128MB / 256MB",
-  },
-  {
-    id: "c-q7r8s9t0",
-    name: "auth-service-2",
-    image: "dockship/auth:v1.8.0",
-    node: "node-02",
-    status: "running" as const,
-    uptime: "5d 8h 22m",
-    cpu: "6%",
-    memory: "142MB / 256MB",
-  },
-  {
-    id: "c-u1v2w3x4",
-    name: "postgres-db-1",
-    image: "postgres:15-alpine",
-    node: "node-01",
-    status: "running" as const,
-    uptime: "12d 4h 15m",
-    cpu: "22%",
-    memory: "1.2GB / 2GB",
-  },
-  {
-    id: "c-y5z6a7b8",
-    name: "redis-cache-1",
-    image: "redis:7-alpine",
-    node: "node-02",
-    status: "running" as const,
-    uptime: "8d 16h 33m",
-    cpu: "4%",
-    memory: "64MB / 128MB",
-  },
-  {
-    id: "c-c9d0e1f2",
-    name: "worker-queue-1",
-    image: "dockship/worker:v3.1.2",
-    node: "node-03",
-    status: "running" as const,
-    uptime: "1d 2h 18m",
-    cpu: "34%",
-    memory: "512MB / 1GB",
-  },
-  {
-    id: "c-g3h4i5j6",
-    name: "worker-queue-2",
-    image: "dockship/worker:v3.1.2",
-    node: "node-03",
-    status: "pending" as const,
-    uptime: "—",
-    cpu: "—",
-    memory: "—",
-  },
-  {
-    id: "c-k7l8m9n0",
-    name: "metrics-collector-1",
-    image: "dockship/metrics:v1.2.0",
-    node: "node-01",
-    status: "error" as const,
-    uptime: "—",
-    cpu: "—",
-    memory: "—",
-  },
-];
+type ContainerSummary = {
+  id: string;
+  name: string;
+  image: string;
+  node: string;
+  status: "running" | "stopped";
+  uptime: string;
+  cpu: string;
+  memory: string;
+};
+
+function summarizeContainer(
+  container: ContainerInfo,
+  nodeName: string
+): ContainerSummary {
+  // 1. Shorten the long container ID
+  const shortId = container.Id.slice(0, 12);
+
+  // 2. Clean the name
+  const name = container.Names[0]?.replace(/^\//, "") ?? "unknown";
+
+  // 3. Normalize status
+  const status = container.State === "running" ? "running" : "stopped";
+
+  // 4. Compute uptime from Status string (if available)
+  const uptime = container.Status?.replace(/^Up\s*/, "") ?? "unknown";
+
+  // 5. Placeholder for CPU and memory
+  const cpu = "4%";
+  const memory = "64MB / 128MB";
+
+  return {
+    id: shortId,
+    name,
+    image: container.Image,
+    node: nodeName,
+    status,
+    uptime,
+    cpu,
+    memory,
+  };
+}
 
 export default function ContainersPage() {
+  const [containers, setContainers] = useState<ContainerSummary[]>([]);
+
+  useEffect(() => {
+    const fetchNodes = async () => {
+      const nodes = await getNodes();
+      const dockerNodes = await getDocker(nodes);
+
+      setContainers(
+        nodes.flatMap((node, i) =>
+          dockerNodes[i].containers.map((c) => summarizeContainer(c, node.name))
+        )
+      );
+    };
+
+    fetchNodes();
+  }, []);
+
   return (
     <DashboardLayout
       title="Containers"
@@ -120,12 +82,6 @@ export default function ContainersPage() {
         <Badge>{containers.length} containers</Badge>
         <Badge>
           {containers.filter((c) => c.status === "running").length} running
-        </Badge>
-        <Badge>
-          {containers.filter((c) => c.status === "pending").length} pending
-        </Badge>
-        <Badge variant="destructive">
-          {containers.filter((c) => c.status === "error").length} error
         </Badge>
       </div>
 
@@ -179,9 +135,7 @@ export default function ContainersPage() {
                       {container.image}
                     </td>
 
-                    <td className="py-3 px-4">
-                      <Badge>{container.node}</Badge>
-                    </td>
+                    <td className="py-3 px-4">{container.node}</td>
 
                     <td className="py-3 px-4">{/* {container.status} */}</td>
 
@@ -246,9 +200,7 @@ export default function ContainersPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">Node</span>
-                    <div>
-                      <Badge>{container.node}</Badge>
-                    </div>
+                    <div>{container.node}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Uptime</span>
