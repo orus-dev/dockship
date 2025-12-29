@@ -13,15 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea";
-import {
-  authNode,
-  getLiveNodes,
-  getNodes,
-  setNodes as updateNodes,
-} from "@/core/node";
+import { getLiveNodes } from "@/core/node";
 import { Combobox } from "../ui/combobox";
 import { Node, NodeLiveData } from "@/lib/types";
+import { deployNewApp } from "@/core/application";
 
 export default function DeployApplication({
   children,
@@ -40,7 +35,9 @@ export default function DeployApplication({
     fetchNodes();
   }, []);
 
-  const deploy = () => {};
+  const deploy = async () => {
+    console.log(await deployNewApp(name, repo, node));
+  };
 
   return (
     <Dialog>
