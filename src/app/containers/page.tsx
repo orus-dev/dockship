@@ -4,7 +4,13 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Terminal, MoreVertical, Play, Square, Trash2 } from "lucide-react";
+import {
+  MoreVertical,
+  Play,
+  Square,
+  Trash2,
+  Container,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Docker } from "@/lib/types";
 import { getDocker } from "@/core/docker";
@@ -88,7 +94,7 @@ export default function ContainersPage() {
       <Card>
         <CardContent className="p-0">
           {/* ================= DESKTOP TABLE ================= */}
-          <div className="hidden md:block">
+          <div className="hidden xl:block">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
@@ -119,7 +125,7 @@ export default function ContainersPage() {
                   <tr key={container.id} className="data-table-row">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-muted-foreground" />
+                        <Container className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <div className="font-mono text-sm">
                             {container.name}
@@ -177,13 +183,13 @@ export default function ContainersPage() {
           </div>
 
           {/* ================= MOBILE CARDS ================= */}
-          <div className="md:hidden divide-y divide-border">
+          <div className="xl:hidden divide-y divide-border">
             {containers.map((container) => (
               <div key={container.id} className="p-4 space-y-3">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-muted-foreground" />
+                    <Container className="w-4 h-4 text-muted-foreground" />
                     <span className="font-mono text-sm">{container.name}</span>
                   </div>
                   {/* {container.status} */}
