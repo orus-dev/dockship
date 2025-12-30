@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { getApplications } from "@/core/server/application";
+import { deployNewApp, getApplications } from "@/core/server/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -18,5 +18,32 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   return NextResponse.json({
     message: "ok",
     applications,
+  });
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const auth = await testAuth(req);
+  const { name, repo, nodeId }: { name: string; repo: string; nodeId: string } =
+    await req.json();
+
+  if (auth) {
+    return NextResponse.json(
+      { message: auth },
+      { status: StatusCodes.UNAUTHORIZED }
+    );
+  }
+
+  if ((!name && !repo) || !nodeId) {
+    return NextResponse.json(
+      { message: "Body missing name, repo, nodeId" },
+      { status: StatusCodes.BAD_REQUEST }
+    );
+  }
+
+  const res = await deployNewApp(name, repo, nodeId);
+
+  return NextResponse.json({
+    message: "ok",
+    ...res,
   });
 }
