@@ -4,18 +4,17 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  MoreVertical,
-  Play,
-  Square,
-  Trash2,
-  Container,
-} from "lucide-react";
+import { MoreVertical, Play, Square, Trash2, Container } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Docker } from "@/lib/types";
 import { getDocker } from "@/core/docker";
 import { getNodes } from "@/core/node";
 import { ContainerInfo } from "dockerode";
+import { formatBytes } from "@/lib/format";
+import {
+  getContainerStats,
+  startContainer,
+  stopContainer,
+} from "@/core/docker";
 
 type ContainerSummary = {
   id: string;
@@ -24,16 +23,16 @@ type ContainerSummary = {
   node: string;
   status: "running" | "stopped";
   uptime: string;
-  cpu: string;
+  cpu: number;
   memory: string;
 };
 
-function summarizeContainer(
+async function summarizeContainer(
   container: ContainerInfo,
   nodeName: string
-): ContainerSummary {
+): Promise<ContainerSummary> {
   // 1. Shorten the long container ID
-  const shortId = container.Id.slice(0, 12);
+  const shortId = container.Id;
 
   // 2. Clean the name
   const name = container.Names[0]?.replace(/^\//, "") ?? "unknown";
@@ -44,9 +43,13 @@ function summarizeContainer(
   // 4. Compute uptime from Status string (if available)
   const uptime = container.Status?.replace(/^Up\s*/, "") ?? "unknown";
 
-  // 5. Placeholder for CPU and memory
-  const cpu = "4%";
-  const memory = "64MB / 128MB";
+  const stats = await getContainerStats(container.Id);
+
+  // 5. CPU and memory
+  const cpu = stats?.cpu_stats?.cpu_usage?.total_usage || 0;
+  const memory = `${formatBytes(
+    stats?.memory_stats?.usage || 0
+  )} / ${formatBytes(stats?.memory_stats?.max_usage || 0)}`;
 
   return {
     id: shortId,
@@ -69,8 +72,12 @@ export default function ContainersPage() {
       const dockerNodes = await getDocker(nodes);
 
       setContainers(
-        nodes.flatMap((node, i) =>
-          dockerNodes[i].containers.map((c) => summarizeContainer(c, node.name))
+        await Promise.all(
+          nodes.flatMap((node, i) =>
+            dockerNodes[i].containers.map((c) =>
+              summarizeContainer(c, node.name)
+            )
+          )
         )
       );
     };
@@ -131,7 +138,7 @@ export default function ContainersPage() {
                             {container.name}
                           </div>
                           <div className="text-[10px] text-muted-foreground font-mono">
-                            {container.id}
+                            {container.id.slice(0, 12)}
                           </div>
                         </div>
                       </div>
@@ -160,11 +167,19 @@ export default function ContainersPage() {
                     <td className="py-3 px-4">
                       <div className="flex justify-end gap-1">
                         {container.status === "running" ? (
-                          <Button variant="ghost" size="icon-sm">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => stopContainer(container.id)}
+                          >
                             <Square className="w-3 h-3" />
                           </Button>
                         ) : (
-                          <Button variant="ghost" size="icon-sm">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => startContainer(container.id)}
+                          >
                             <Play className="w-3 h-3" />
                           </Button>
                         )}

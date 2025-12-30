@@ -120,7 +120,11 @@ export default function OverviewPage() {
         />
         <StatCard
           title="Containers"
-          value={dockerNodes.reduce((sum, n) => sum + n.containers.length, 0)}
+          value={dockerNodes.reduce(
+            (sum, n) =>
+              sum + n.containers.filter((c) => c.State === "running").length,
+            0
+          )}
           subtitle="running"
           icon={<Container className="w-4 h-4" />}
         />
