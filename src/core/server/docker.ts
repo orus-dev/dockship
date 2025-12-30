@@ -13,7 +13,7 @@ export async function getDocker() {
 export async function getContainerStats(
   containerId: string
 ): Promise<ContainerStats | undefined> {
-  return await (await docker.getContainer(containerId)).stats();
+  return await docker.getContainer(containerId).stats();
 }
 
 export async function startContainer(containerId: string) {

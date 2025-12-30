@@ -6,6 +6,9 @@ import fs from "fs/promises";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
+import { getNodes } from "./node";
+import axios from "axios";
+import { Application } from "@/lib/types";
 
 const execAsync = util.promisify(exec);
 
@@ -69,4 +72,21 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
     appId,
     image: imageTag,
   };
+}
+
+export async function getApplications(): Promise<Application[]> {
+  const nodes = await getNodes();
+
+  return (
+    await Promise.all(
+      nodes.map(
+        async (n) =>
+          await (
+            await axios.get(`http://${n.ip}:3000/api/applications`, {
+              headers: { Authorization: `ApiKey ${n.key}` },
+            })
+          ).data.applications
+      )
+    )
+  ).flat();
 }

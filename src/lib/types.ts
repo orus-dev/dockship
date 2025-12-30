@@ -47,3 +47,16 @@ export interface Docker {
   version: string;
   containers: ContainerInfo[];
 }
+
+export interface Application {
+  id: string;
+  name: string;
+  image: string;
+  containers: number;
+  replicas: string;
+  cpu: number;
+  memory: number;
+  network: string;
+  status: "running" | "stopped";
+  ports: string[];
+}
