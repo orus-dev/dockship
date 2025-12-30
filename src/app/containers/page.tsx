@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Play, Square, Trash2, Container } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getDocker } from "@/core/docker";
+import { getDocker, removeContainer } from "@/core/docker";
 import { getNodes } from "@/core/node";
 import { ContainerInfo } from "dockerode";
 import { formatBytes } from "@/lib/format";
@@ -15,6 +15,17 @@ import {
   startContainer,
   stopContainer,
 } from "@/core/docker";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 type ContainerSummary = {
   id: string;
@@ -61,6 +72,39 @@ async function summarizeContainer(
     cpu,
     memory,
   };
+}
+
+function RemoveDialog({ container }: { container: ContainerSummary }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon-sm">
+          <Trash2 className="w-3 h-3 text-destructive" />
+        </Button>
+      </AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently remove the
+            container.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => removeContainer(container.id)}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 export default function ContainersPage() {
@@ -183,9 +227,7 @@ export default function ContainersPage() {
                             <Play className="w-3 h-3" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon-sm">
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                        <RemoveDialog container={container} />
                         <Button variant="ghost" size="icon-sm">
                           <MoreVertical className="w-3 h-3" />
                         </Button>

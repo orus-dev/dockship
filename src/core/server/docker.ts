@@ -23,3 +23,7 @@ export async function startContainer(containerId: string) {
 export async function stopContainer(containerId: string) {
   await docker.getContainer(containerId).stop();
 }
+
+export async function removeContainer(containerId: string) {
+  await docker.getContainer(containerId).remove();
+}

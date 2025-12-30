@@ -73,3 +73,17 @@ export async function stopContainer(containerId: string) {
       ).data
   );
 }
+
+export async function removeContainer(containerId: string) {
+  const nodes = await getNodes();
+
+  nodes.forEach(
+    async (n) =>
+      await (
+        await axios.delete(`http://${n.ip}:3000/api/container`, {
+          headers: { Authorization: `ApiKey ${n.key}` },
+          params: { containerId },
+        })
+      ).data
+  );
+}
