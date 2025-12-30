@@ -33,7 +33,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if ((!name && !repo) || !nodeId) {
+  if (!name || !repo || !nodeId) {
     return NextResponse.json(
       { message: "Body missing name, repo, nodeId" },
       { status: StatusCodes.BAD_REQUEST }
