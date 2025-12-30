@@ -9,19 +9,10 @@ import { getMetrics } from "@/core/metrics";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
-import { getLiveNodes } from "@/core/node";
+import { getLiveNodes, getNodes } from "@/core/node";
 import { average } from "@/lib/format";
-
-const containerMetrics = [
-  { name: "api-gateway-1", cpu: 45, memory: 62, network: "12.4 MB/s" },
-  { name: "api-gateway-2", cpu: 52, memory: 58, network: "10.2 MB/s" },
-  { name: "api-gateway-3", cpu: 38, memory: 55, network: "8.8 MB/s" },
-  { name: "auth-service-1", cpu: 28, memory: 45, network: "3.2 MB/s" },
-  { name: "auth-service-2", cpu: 32, memory: 48, network: "2.8 MB/s" },
-  { name: "postgres-db-1", cpu: 65, memory: 78, network: "8.1 MB/s" },
-  { name: "redis-cache-1", cpu: 12, memory: 34, network: "1.8 MB/s" },
-  { name: "worker-queue-1", cpu: 55, memory: 48, network: "5.6 MB/s" },
-];
+import { ContainerStats } from "dockerode";
+import { getContainerStats, getDocker } from "@/core/docker";
 
 const cpuChartConfig = {
   cpu: { label: "CPU Usage", color: "var(--chart-1)" },
@@ -51,6 +42,9 @@ export default function MonitoringPage() {
     cpuUsage: number;
     ramUsage: number;
   }>();
+  const [containerStats, SetContainerStats] = useState<
+    (ContainerStats & { name: string })[]
+  >([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -75,6 +69,32 @@ export default function MonitoringPage() {
     const i = setInterval(fetchMetrics, 30000);
 
     return () => clearInterval(i);
+  }, []);
+
+  useEffect(() => {
+    async function fetchContainerMetrics() {
+      const nodes = await getNodes();
+      const dockerNodes = await getDocker(nodes);
+
+      SetContainerStats(
+        (
+          await Promise.all(
+            dockerNodes.flatMap((node) =>
+              node.containers.map(async (c) => {
+                const stats = await getContainerStats(c.Id);
+
+                if (stats === undefined) return undefined;
+
+                return { ...stats, name: c.Names[0] };
+              })
+            )
+          )
+        ).filter((s): s is ContainerStats & { name: string } => s !== undefined)
+      );
+
+      console.log(containerStats);
+    }
+    fetchContainerMetrics();
   }, []);
 
   return (
@@ -175,7 +195,7 @@ export default function MonitoringPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {containerMetrics.map((container) => (
+            {containerStats.map((container) => (
               <div
                 key={container.name}
                 className="border border-border p-3 bg-secondary/20"
@@ -187,20 +207,31 @@ export default function MonitoringPage() {
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>CPU</span>
-                      <span>{container.cpu}%</span>
+                      <span>
+                        {container?.cpu_stats?.cpu_usage?.total_usage}%
+                      </span>
                     </div>
-                    <Progress value={container.cpu} className="w-full" />
+                    <Progress
+                      value={container?.cpu_stats?.cpu_usage?.total_usage}
+                      className="w-full"
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>Memory</span>
-                      <span>{container.memory}%</span>
+                      <span>{container?.memory_stats?.usage}%</span>
                     </div>
-                    <Progress value={container.memory} className="w-full" />
+                    <Progress
+                      value={container?.memory_stats?.usage}
+                      className="w-full"
+                    />
                   </div>
                   <div className="flex justify-between text-[10px] pt-1 border-t border-border">
                     <span className="text-muted-foreground">Network</span>
-                    <span className="font-mono">{container.network}</span>
+                    <span className="font-mono">
+                      {container?.networks &&
+                        container?.networks[0]?.tx_packets}
+                    </span>
                   </div>
                 </div>
               </div>
