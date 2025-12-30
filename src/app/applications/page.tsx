@@ -1,89 +1,27 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import DeployApplication from "@/components/dialogs/DeployApplication";
-
-const applications = [
-  {
-    id: "app-001",
-    name: "api-gateway",
-    image: "dockship/api-gateway:v2.4.1",
-    containers: 3,
-    replicas: "3/3",
-    cpu: 45,
-    memory: 62,
-    network: "12.4 MB/s",
-    status: "running" as const,
-    ports: ["80:8080", "443:8443"],
-  },
-  {
-    id: "app-002",
-    name: "auth-service",
-    image: "dockship/auth:v1.8.0",
-    containers: 2,
-    replicas: "2/2",
-    cpu: 28,
-    memory: 45,
-    network: "3.2 MB/s",
-    status: "running" as const,
-    ports: ["9000:9000"],
-  },
-  {
-    id: "app-003",
-    name: "postgres-db",
-    image: "postgres:15-alpine",
-    containers: 1,
-    replicas: "1/1",
-    cpu: 65,
-    memory: 78,
-    network: "8.1 MB/s",
-    status: "running" as const,
-    ports: ["5432:5432"],
-  },
-  {
-    id: "app-004",
-    name: "redis-cache",
-    image: "redis:7-alpine",
-    containers: 1,
-    replicas: "1/1",
-    cpu: 12,
-    memory: 34,
-    network: "1.8 MB/s",
-    status: "running" as const,
-    ports: ["6379:6379"],
-  },
-  {
-    id: "app-005",
-    name: "worker-queue",
-    image: "dockship/worker:v3.1.2",
-    containers: 4,
-    replicas: "3/4",
-    cpu: 55,
-    memory: 48,
-    network: "5.6 MB/s",
-    status: "pending" as const,
-    ports: [],
-  },
-  {
-    id: "app-006",
-    name: "metrics-collector",
-    image: "dockship/metrics:v1.2.0",
-    containers: 2,
-    replicas: "0/2",
-    cpu: 0,
-    memory: 0,
-    network: "0 MB/s",
-    status: "error" as const,
-    ports: ["9090:9090"],
-  },
-];
+import { useEffect, useState } from "react";
+import { Application } from "@/lib/types";
+import { getApplications } from "@/core/application";
 
 export default function ApplicationsPage() {
+  const [applications, setApplications] = useState<Application[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      setApplications(await getApplications());
+    };
+
+    fetch();
+  }, []);
+
   return (
     <DashboardLayout
       title="Applications"
@@ -107,8 +45,8 @@ export default function ApplicationsPage() {
       </div>
 
       <div className="space-y-3">
-        {applications.map((app) => (
-          <Card key={app.id}>
+        {applications.map((app, i) => (
+          <Card key={i}>
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:items-center">
                 {/* Status & Name */}
@@ -166,7 +104,7 @@ export default function ApplicationsPage() {
                     Ports
                   </div>
                   <div className="flex gap-1 flex-wrap">
-                    {app.ports.length > 0 ? (
+                    {app.ports?.length > 0 ? (
                       app.ports.map((port) => (
                         <Badge key={port} className="text-[10px]">
                           {port}
