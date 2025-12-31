@@ -18,7 +18,29 @@
 
 ## Key Features
 
-- Easy deployment
+#### Core Deployment
+
+- **Easy Deployment** - Deploy Dockerized applications in just a few clicks. Provide your app name, repository, and Docker image, and DockShip handles the rest.
+- **Docker Integration** - Pull and run images from any registry. Validate Dockerfiles and optionally build images from repositories.
+
+#### Application Management
+
+- **App Management** - Start, stop, restart, and remove applications from the dashboard. Track running containers and deployed images easily.
+- **Real-Time Logs & Monitoring** - Stream container logs in real-time and monitor CPU, memory, and disk usage for each node.
+
+#### Multi-Node & Scaling
+
+- **Multi-Node Support** - Manage multiple nodes in your infrastructure. Deploy applications across nodes and monitor them centrally.
+- **Extensible Architecture** - Each application stores its metadata and Docker image reference, making builds, redeployments, and future scaling simple.
+
+#### Security & User Experience
+
+- **Secure Access** - Authenticate users to ensure only authorized personnel can deploy and manage applications.
+- **User-Friendly Dashboard** - Clean and responsive UI with light/dark mode support. Quickly see all apps, their status, and node assignments.
+
+#### Future Features
+
+- Git integration and automatic builds
 
 ## Installation
 
