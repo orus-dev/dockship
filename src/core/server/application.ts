@@ -1,12 +1,13 @@
 "use server";
 
-import Docker from "dockerode";
+import Docker, { Container, ContainerStats } from "dockerode";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
 import { ImageApp } from "@/lib/types";
+import { CPUusage } from "@/lib/server/calc";
 
 const docker = new Docker();
 const execAsync = util.promisify(exec);
@@ -42,6 +43,9 @@ export async function getApplications(): Promise<ImageApp[]> {
 
       if (containerInfo.State === "running") {
         const stats = await container.stats({ stream: false });
+
+        totalMem += (stats.memory_stats.usage / stats.memory_stats.limit) * 100;
+        totalCpu += CPUusage(stats);
       }
     }
 
@@ -62,8 +66,8 @@ export async function getApplications(): Promise<ImageApp[]> {
       image: imageName,
       containers: relatedContainers.length,
       replicas: `${running}/${relatedContainers.length}`,
-      cpu: Math.round(totalCpu),
-      memory: Math.round(totalMem),
+      cpu: totalCpu,
+      memory: totalMem,
       network: "—",
       status: running > 0 ? ("running" as const) : ("stopped" as const),
       ports: [...ports],

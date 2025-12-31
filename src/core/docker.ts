@@ -1,9 +1,8 @@
 "use server";
 
 import axios from "axios";
-import { Docker, Node } from "@/lib/types";
+import { Docker, Node, SimpleStats } from "@/lib/types";
 import { verifySession } from "./auth/session";
-import { ContainerStats } from "dockerode";
 import { getNodes } from "./node";
 
 export async function getDocker(nodes: Node[]): Promise<Docker[]> {
@@ -24,7 +23,7 @@ export async function getDocker(nodes: Node[]): Promise<Docker[]> {
 
 export async function getContainerStats(
   containerId: string
-): Promise<ContainerStats | undefined> {
+): Promise<SimpleStats | undefined> {
   const nodes = await getNodes();
 
   return (

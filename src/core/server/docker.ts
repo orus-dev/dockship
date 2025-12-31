@@ -1,6 +1,8 @@
 "use server";
 
-import Docker, { ContainerStats } from "dockerode";
+import { CPUusage } from "@/lib/server/calc";
+import { SimpleStats } from "@/lib/types";
+import Docker from "dockerode";
 
 const docker = new Docker();
 
@@ -12,8 +14,13 @@ export async function getDocker() {
 
 export async function getContainerStats(
   containerId: string
-): Promise<ContainerStats | undefined> {
-  return await docker.getContainer(containerId).stats();
+): Promise<SimpleStats | undefined> {
+  const stats = await docker.getContainer(containerId).stats({ stream: false });
+
+  return {
+    cpu: CPUusage(stats),
+    memory: (stats.memory_stats.usage / stats.memory_stats.limit) * 100,
+  };
 }
 
 export async function startContainer(containerId: string) {

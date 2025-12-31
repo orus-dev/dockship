@@ -69,3 +69,8 @@ export interface ImageApp {
   status: "running" | "stopped";
   ports: string[];
 }
+
+export interface SimpleStats {
+  cpu: number;
+  memory: number;
+}

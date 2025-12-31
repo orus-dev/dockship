@@ -20,9 +20,10 @@ export default function ApplicationsPage() {
     };
 
     fetch();
-  }, []);
 
-  console.log(applications);
+    const iid = setInterval(fetch, 3000);
+    return () => clearInterval(iid);
+  }, []);
 
   return (
     <DashboardLayout
@@ -77,7 +78,9 @@ export default function ApplicationsPage() {
                   <div className="text-xs text-muted-foreground mb-1">CPU</div>
                   <div className="flex items-center gap-2">
                     <Progress value={app.cpu} className="w-full" />
-                    <span className="text-xs font-mono w-8">{app.cpu}%</span>
+                    <span className="text-xs font-mono w-8">
+                      {app.cpu.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
 
@@ -88,7 +91,9 @@ export default function ApplicationsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Progress value={app.memory} className="w-full" />
-                    <span className="text-xs font-mono w-8">{app.memory}%</span>
+                    <span className="text-xs font-mono w-8">
+                      {app.memory.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
 

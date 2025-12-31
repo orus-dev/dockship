@@ -35,7 +35,7 @@ type ContainerSummary = {
   status: "running" | "stopped";
   uptime: string;
   cpu: number;
-  memory: string;
+  memory: number;
 };
 
 async function summarizeContainer(
@@ -56,12 +56,6 @@ async function summarizeContainer(
 
   const stats = await getContainerStats(container.Id);
 
-  // 5. CPU and memory
-  const cpu = stats?.cpu_stats?.cpu_usage?.total_usage || 0;
-  const memory = `${formatBytes(
-    stats?.memory_stats?.usage || 0
-  )} / ${formatBytes(stats?.memory_stats?.max_usage || 0)}`;
-
   return {
     id: shortId,
     name,
@@ -69,8 +63,8 @@ async function summarizeContainer(
     node: nodeName,
     status,
     uptime,
-    cpu,
-    memory,
+    cpu: stats?.cpu || 0,
+    memory: stats?.memory || 0,
   };
 }
 
@@ -194,18 +188,18 @@ export default function ContainersPage() {
 
                     <td className="py-3 px-4">{container.node}</td>
 
-                    <td className="py-3 px-4">{/* {container.status} */}</td>
+                    <td className="py-3 px-4">{container.status}</td>
 
                     <td className="py-3 px-4 font-mono text-xs">
                       {container.uptime}
                     </td>
 
                     <td className="py-3 px-4 font-mono text-xs">
-                      {container.cpu}
+                      {container.cpu.toFixed(1)}%
                     </td>
 
                     <td className="py-3 px-4 font-mono text-xs">
-                      {container.memory}
+                      {container.memory.toFixed(1)}%
                     </td>
 
                     <td className="py-3 px-4">
@@ -249,7 +243,7 @@ export default function ContainersPage() {
                     <Container className="w-4 h-4 text-muted-foreground" />
                     <span className="font-mono text-sm">{container.name}</span>
                   </div>
-                  {/* {container.status} */}
+                  {container.status}
                 </div>
 
                 <div className="text-[10px] font-mono text-muted-foreground">
@@ -271,11 +265,13 @@ export default function ContainersPage() {
                   </div>
                   <div>
                     <span className="text-muted-foreground">CPU</span>
-                    <div className="font-mono">{container.cpu}</div>
+                    <div className="font-mono">{container.cpu.toFixed(1)}%</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Memory</span>
-                    <div className="font-mono">{container.memory}</div>
+                    <div className="font-mono">
+                      {container.memory.toFixed(1)}%
+                    </div>
                   </div>
                 </div>
 

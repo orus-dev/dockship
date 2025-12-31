@@ -11,8 +11,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
 import { getLiveNodes, getNodes } from "@/core/node";
 import { average } from "@/lib/format";
-import { ContainerStats } from "dockerode";
 import { getContainerStats, getDocker } from "@/core/docker";
+import { SimpleStats } from "@/lib/types";
 
 const cpuChartConfig = {
   cpu: { label: "CPU Usage", color: "var(--chart-1)" },
@@ -43,7 +43,7 @@ export default function MonitoringPage() {
     ramUsage: number;
   }>();
   const [containerStats, SetContainerStats] = useState<
-    (ContainerStats & { name: string })[]
+    (SimpleStats & { name: string })[]
   >([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function MonitoringPage() {
               })
             )
           )
-        ).filter((s): s is ContainerStats & { name: string } => s !== undefined)
+        ).filter((s): s is SimpleStats & { name: string } => s !== undefined)
       );
 
       console.log(containerStats);
@@ -207,31 +207,20 @@ export default function MonitoringPage() {
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>CPU</span>
-                      <span>
-                        {container?.cpu_stats?.cpu_usage?.total_usage}%
-                      </span>
+                      <span>{container.cpu.toFixed(1)}%</span>
                     </div>
-                    <Progress
-                      value={container?.cpu_stats?.cpu_usage?.total_usage}
-                      className="w-full"
-                    />
+                    <Progress value={container.cpu} className="w-full" />
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>Memory</span>
-                      <span>{container?.memory_stats?.usage}%</span>
+                      <span>{container.memory.toFixed(1)}%</span>
                     </div>
-                    <Progress
-                      value={container?.memory_stats?.usage}
-                      className="w-full"
-                    />
+                    <Progress value={container.memory} className="w-full" />
                   </div>
                   <div className="flex justify-between text-[10px] pt-1 border-t border-border">
                     <span className="text-muted-foreground">Network</span>
-                    <span className="font-mono">
-                      {container?.networks &&
-                        container?.networks[0]?.tx_packets}
-                    </span>
+                    <span className="font-mono"></span>
                   </div>
                 </div>
               </div>
