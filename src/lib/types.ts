@@ -51,6 +51,15 @@ export interface Docker {
 export interface Application {
   id: string;
   name: string;
+  repo: string;
+  nodeId: string;
+  createdAt: string;
+}
+
+export interface ImageApp {
+  app?: Application;
+  id: string;
+  name: string;
   image: string;
   containers: number;
   replicas: string;

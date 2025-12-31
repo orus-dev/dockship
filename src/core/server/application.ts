@@ -2,22 +2,21 @@
 
 import Docker from "dockerode";
 import { randomUUID } from "crypto";
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
-import axios from "axios";
-import { Application } from "@/lib/types";
+import { ImageApp } from "@/lib/types";
 
 const docker = new Docker();
 const execAsync = util.promisify(exec);
 const DATA_DIR = path.join(process.cwd(), "data", "apps");
 
-export async function getApplications(): Promise<Application[]> {
+export async function getApplications(): Promise<ImageApp[]> {
   const images = await docker.listImages();
   const containers = await docker.listContainers({ all: true });
 
-  const apps: Application[] = [];
+  const apps: ImageApp[] = [];
 
   for (const image of images) {
     const imageName = image.RepoTags?.[0];
@@ -46,9 +45,20 @@ export async function getApplications(): Promise<Application[]> {
       }
     }
 
+    const name = imageName.split("/").pop()?.split(":")[0] ?? imageName;
+
+    var app;
+
+    try {
+      app = JSON.parse(
+        fs.readFileSync(path.join(DATA_DIR, name, "app.json")).toString()
+      );
+    } catch {}
+
     apps.push({
+      app,
+      name,
       id: image.Id.slice(7, 15),
-      name: imageName.split("/").pop()?.split(":")[0] ?? imageName,
       image: imageName,
       containers: relatedContainers.length,
       replicas: `${running}/${relatedContainers.length}`,
@@ -70,7 +80,7 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
   const repoDir = path.join(appDir, "repo");
 
   // Create directories
-  await fs.mkdir(repoDir, { recursive: true });
+  fs.mkdirSync(repoDir, { recursive: true });
 
   // Write app.json
   const appConfig = {
@@ -81,7 +91,7 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
     createdAt: new Date().toISOString(),
   };
 
-  await fs.writeFile(
+  fs.writeFileSync(
     path.join(appDir, "app.json"),
     JSON.stringify(appConfig, null, 2)
   );
@@ -97,7 +107,7 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
   const dockerfilePath = path.join(repoDir, "Dockerfile");
 
   try {
-    await fs.access(dockerfilePath);
+    fs.accessSync(dockerfilePath);
   } catch {
     throw new Error("Dockerfile not found in repository root");
   }

@@ -8,11 +8,11 @@ import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import DeployApplication from "@/components/dialogs/DeployApplication";
 import { useEffect, useState } from "react";
-import { Application } from "@/lib/types";
+import { ImageApp } from "@/lib/types";
 import { getApplications } from "@/core/application";
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<ImageApp[]>([]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -21,6 +21,8 @@ export default function ApplicationsPage() {
 
     fetch();
   }, []);
+
+  console.log(applications);
 
   return (
     <DashboardLayout
@@ -54,7 +56,7 @@ export default function ApplicationsPage() {
                   {/* {app.status} */}
                   <div className="min-w-0">
                     <div className="font-mono text-sm font-medium">
-                      {app.name}
+                      {app.app?.name || app.name}
                     </div>
                     <div className="text-xs text-muted-foreground font-mono truncate">
                       {app.image}
@@ -62,10 +64,10 @@ export default function ApplicationsPage() {
                   </div>
                 </div>
 
-                {/* Replicas */}
+                {/* Containers */}
                 <div className="flex justify-between md:block md:col-span-1">
                   <span className="text-xs text-muted-foreground md:hidden">
-                    Replicas
+                    Containers
                   </span>
                   <div className="font-mono text-sm">{app.replicas}</div>
                 </div>
