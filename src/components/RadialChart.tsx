@@ -1,20 +1,5 @@
 "use client";
 
-import {
-  Label,
-  PolarGrid,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from "recharts";
-import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
-
-const chartConfig = {
-  value: {
-    label: "Value",
-  },
-} satisfies ChartConfig;
-
 export default function RadialChart({
   value,
   children,
@@ -22,57 +7,70 @@ export default function RadialChart({
   value: number;
   children?: React.ReactNode;
 }) {
-  const chartData = [{ value, fill: "var(--color-chart-1)" }];
+  const radius = 42;
+  const stroke = 10;
+  const circumference = 2 * Math.PI * radius;
+
+  const TRIM_ANGLE = 80;
+  const ARC_ANGLE = 360 - TRIM_ANGLE;
+
+  const progress = Math.min(Math.max(value, 0), 100);
+  const arcLength = circumference * (ARC_ANGLE / 360);
+  const offset = arcLength * (1 - progress / 100);
 
   return (
-    <ChartContainer config={chartConfig} className="w-full aspect-square">
-      <RadialBarChart
-        data={chartData}
-        startAngle={230 - 360 * (value / 100)}
-        endAngle={230}
-        innerRadius={80}
-        outerRadius={110}
-      >
-        <PolarGrid
-          gridType="circle"
-          radialLines={false}
-          stroke="none"
-          className="first:fill-muted last:fill-background"
-          polarRadius={[86, 74]}
+    <div className="w-full aspect-square">
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        {/* background arc */}
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          stroke="var(--muted)"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${arcLength} ${circumference}`}
+          strokeDashoffset={0}
+          transform="rotate(130 50 50)"
         />
-        <RadialBar dataKey="value" background cornerRadius={10} />
-        <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-          <Label
-            content={({ viewBox }) => {
-              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                return (
-                  <text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                  >
-                    <tspan
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      className="fill-foreground text-xl font-bold"
-                    >
-                      {chartData[0].value.toFixed(1)}%
-                    </tspan>
-                    <tspan
-                      x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 24}
-                      className="fill-muted-foreground"
-                    >
-                      {children}
-                    </tspan>
-                  </text>
-                );
-              }
-            }}
-          />
-        </PolarRadiusAxis>
-      </RadialBarChart>
-    </ChartContainer>
+
+        {/* progress arc */}
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          stroke="var(--color-chart-1)"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${arcLength} ${circumference}`}
+          strokeDashoffset={offset}
+          transform="rotate(130 50 50)"
+        />
+
+        {/* center text */}
+        <text
+          x="50"
+          y="50"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-foreground text-sm font-bold"
+        >
+          {value.toFixed(1)}%
+        </text>
+
+        {children && (
+          <text
+            x="50"
+            y="67"
+            textAnchor="middle"
+            className="fill-muted-foreground text-xs"
+          >
+            {children}
+          </text>
+        )}
+      </svg>
+    </div>
   );
 }
