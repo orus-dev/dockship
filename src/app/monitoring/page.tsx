@@ -207,14 +207,14 @@ export default function MonitoringPage() {
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>CPU</span>
-                      <span>{container.cpu.toFixed(1)}%</span>
+                      <span>{container.cpu?.toFixed(1)}%</span>
                     </div>
                     <Progress value={container.cpu} className="w-full" />
                   </div>
                   <div>
                     <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                       <span>Memory</span>
-                      <span>{container.memory.toFixed(1)}%</span>
+                      <span>{container.memory?.toFixed(1)}%</span>
                     </div>
                     <Progress value={container.memory} className="w-full" />
                   </div>
