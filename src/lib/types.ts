@@ -74,3 +74,10 @@ export interface SimpleStats {
   cpu: number;
   memory: number;
 }
+
+export interface Log {
+  timestamp: string;
+  level: "info" | "warn" | "error";
+  source: string;
+  message: string;
+}

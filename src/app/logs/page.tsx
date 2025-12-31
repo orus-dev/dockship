@@ -1,143 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pause, Play, Download, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const logEntries = [
-  {
-    timestamp: "2024-01-15 14:32:45.123",
-    level: "info",
-    source: "api-gateway-1",
-    message: "Request received: GET /api/v1/users",
-  },
-  {
-    timestamp: "2024-01-15 14:32:45.145",
-    level: "info",
-    source: "api-gateway-1",
-    message: "Response sent: 200 OK (22ms)",
-  },
-  {
-    timestamp: "2024-01-15 14:32:46.012",
-    level: "info",
-    source: "auth-service-1",
-    message: "Token validation successful for user_id=12345",
-  },
-  {
-    timestamp: "2024-01-15 14:32:46.234",
-    level: "warn",
-    source: "worker-queue-2",
-    message: "Job queue depth exceeded threshold: 150 pending jobs",
-  },
-  {
-    timestamp: "2024-01-15 14:32:47.001",
-    level: "info",
-    source: "postgres-db-1",
-    message: "Query executed: SELECT * FROM users WHERE id = $1 (2ms)",
-  },
-  {
-    timestamp: "2024-01-15 14:32:47.456",
-    level: "info",
-    source: "api-gateway-2",
-    message: "Request received: POST /api/v1/orders",
-  },
-  {
-    timestamp: "2024-01-15 14:32:47.789",
-    level: "error",
-    source: "metrics-collector-1",
-    message: "Failed to connect to metrics endpoint: connection refused",
-  },
-  {
-    timestamp: "2024-01-15 14:32:48.012",
-    level: "error",
-    source: "metrics-collector-1",
-    message: "Retry attempt 1/3 failed",
-  },
-  {
-    timestamp: "2024-01-15 14:32:48.234",
-    level: "info",
-    source: "redis-cache-1",
-    message: "Cache hit: session:user:12345",
-  },
-  {
-    timestamp: "2024-01-15 14:32:49.001",
-    level: "info",
-    source: "worker-queue-1",
-    message: "Job completed: send_email_notification (job_id=abc123)",
-  },
-  {
-    timestamp: "2024-01-15 14:32:49.345",
-    level: "warn",
-    source: "api-gateway-3",
-    message: "High latency detected: upstream response took 850ms",
-  },
-  {
-    timestamp: "2024-01-15 14:32:50.012",
-    level: "info",
-    source: "auth-service-2",
-    message: "New session created for user_id=67890",
-  },
-  {
-    timestamp: "2024-01-15 14:32:50.456",
-    level: "error",
-    source: "metrics-collector-1",
-    message: "Retry attempt 2/3 failed",
-  },
-  {
-    timestamp: "2024-01-15 14:32:51.001",
-    level: "info",
-    source: "api-gateway-1",
-    message: "Request received: GET /api/v1/health",
-  },
-  {
-    timestamp: "2024-01-15 14:32:51.023",
-    level: "info",
-    source: "api-gateway-1",
-    message: "Response sent: 200 OK (2ms)",
-  },
-  {
-    timestamp: "2024-01-15 14:32:52.012",
-    level: "info",
-    source: "worker-queue-3",
-    message: "Processing job: generate_report (job_id=def456)",
-  },
-  {
-    timestamp: "2024-01-15 14:32:52.234",
-    level: "error",
-    source: "metrics-collector-1",
-    message: "Retry attempt 3/3 failed. Giving up.",
-  },
-  {
-    timestamp: "2024-01-15 14:32:52.456",
-    level: "error",
-    source: "metrics-collector-1",
-    message: "Container entering unhealthy state",
-  },
-  {
-    timestamp: "2024-01-15 14:32:53.012",
-    level: "info",
-    source: "postgres-db-1",
-    message: "Connection pool: 12/50 active connections",
-  },
-  {
-    timestamp: "2024-01-15 14:32:54.001",
-    level: "info",
-    source: "api-gateway-2",
-    message: "Request received: PUT /api/v1/users/12345",
-  },
-];
+import { Log } from "@/lib/types";
+import { getAllContainerLogs } from "@/core/docker";
 
 export default function LogsPage() {
   const [isPaused, setIsPaused] = useState(false);
   const [filter, setFilter] = useState<"all" | "info" | "warn" | "error">(
     "all"
   );
+  const [logs, setLogs] = useState<Log[]>([]);
 
-  const filteredLogs = logEntries.filter((log) =>
+  useEffect(() => {
+    const fetch = async () => {
+      setLogs(await getAllContainerLogs());
+    };
+
+    const iid = setInterval(fetch, 1000);
+
+    fetch();
+
+    return () => clearInterval(iid);
+  }, []);
+
+  const filteredLogs = logs.filter((log) =>
     filter === "all" ? true : log.level === filter
   );
 
@@ -182,7 +74,7 @@ export default function LogsPage() {
             onClick={() => setFilter("warn")}
             className="gap-1"
           >
-            <span className="w-2 h-2 rounded-full bg-warning" />
+            <span className="w-2 h-2 rounded-full bg-yellow-300" />
             Warn
           </Button>
           <Button
@@ -256,7 +148,7 @@ export default function LogsPage() {
               >
                 {/* Timestamp */}
                 <span className="text-gray-400 whitespace-nowrap md:mr-3">
-                  {log.timestamp}
+                  {log.timestamp.replace("T", " ").slice(0, 19)}
                 </span>
 
                 {/* Level */}

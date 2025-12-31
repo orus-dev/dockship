@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { Docker, Node, SimpleStats } from "@/lib/types";
+import { Docker, Log, Node, SimpleStats } from "@/lib/types";
 import { verifySession } from "./auth/session";
 import { getNodes } from "./node";
 
@@ -85,4 +85,26 @@ export async function removeContainer(containerId: string) {
         })
       ).data
   );
+}
+
+export async function getAllContainerLogs(): Promise<Log[]> {
+  const nodes = await getNodes();
+
+  return (
+    await Promise.all(
+      nodes.map(
+        async (n) =>
+          await (
+            await axios.get(`http://${n.ip}:3000/api/logs`, {
+              headers: { Authorization: `ApiKey ${n.key}` },
+            })
+          ).data
+      )
+    )
+  )
+    .flat()
+    .sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
 }
