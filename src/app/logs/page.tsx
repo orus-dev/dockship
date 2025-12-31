@@ -19,7 +19,7 @@ export default function LogsPage() {
 
   useEffect(() => {
     const fetch = async () => {
-      setLogs(await getAllContainerLogs());
+      if (!isPaused) setLogs(await getAllContainerLogs());
     };
 
     const iid = setInterval(fetch, 1000);
@@ -32,6 +32,26 @@ export default function LogsPage() {
   const filteredLogs = logs.filter((log) =>
     filter === "all" ? true : log.level === filter
   );
+
+  const handleExport = () => {
+    // Convert data to JSON string
+    const json = JSON.stringify(filteredLogs, null, 2);
+
+    // Create a blob from the JSON
+    const blob = new Blob([json], { type: "application/json" });
+
+    // Create a temporary URL for the blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link and click it
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "logs.json"; // File name
+    link.click();
+
+    // Cleanup
+    URL.revokeObjectURL(url);
+  };
 
   const getLevelClass = (level: string) => {
     switch (level) {
@@ -90,13 +110,15 @@ export default function LogsPage() {
 
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
+          {/* <Button variant="outline" size="sm" className="gap-2">
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">Advanced Filter</span>
-          </Button>
+          </Button> */}
           <Button variant="outline" size="sm" className="gap-2">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline" onClick={handleExport}>
+              Export
+            </span>
           </Button>
 
           <div className="hidden md:block w-px h-6 bg-border" />
