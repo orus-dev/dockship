@@ -1,51 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Eye, EyeOff, Copy, Save, Lock } from "lucide-react";
-
-const envGroups = [
-  {
-    name: "api-gateway",
-    variables: [
-      { key: "PORT", value: "8080", secret: false },
-      { key: "NODE_ENV", value: "production", secret: false },
-      { key: "API_KEY", value: "sk-xxxx-xxxx-xxxx", secret: true },
-      { key: "DATABASE_URL", value: "postgresql://...", secret: true },
-      { key: "REDIS_URL", value: "redis://localhost:6379", secret: false },
-      { key: "LOG_LEVEL", value: "info", secret: false },
-    ],
-  },
-  {
-    name: "auth-service",
-    variables: [
-      { key: "PORT", value: "9000", secret: false },
-      { key: "JWT_SECRET", value: "xxxxxxxxxxxx", secret: true },
-      { key: "JWT_EXPIRY", value: "7d", secret: false },
-      { key: "OAUTH_CLIENT_ID", value: "client-id-xxxx", secret: true },
-      { key: "OAUTH_CLIENT_SECRET", value: "client-secret-xxxx", secret: true },
-    ],
-  },
-  {
-    name: "worker-queue",
-    variables: [
-      { key: "QUEUE_URL", value: "amqp://localhost:5672", secret: false },
-      { key: "CONCURRENCY", value: "10", secret: false },
-      { key: "RETRY_LIMIT", value: "3", secret: false },
-      { key: "DEAD_LETTER_QUEUE", value: "dlq.worker", secret: false },
-    ],
-  },
-];
+import { Env } from "@/lib/types";
+import { getEnv } from "@/core/application";
 
 export default function EnvironmentPage() {
-  const [selectedApp, setSelectedApp] = useState("api-gateway");
+  const [selectedApp, setSelectedApp] = useState("");
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const [envGroups, setEnvGroups] = useState<Record<string, Env[]>>({});
 
-  const currentGroup = envGroups.find((g) => g.name === selectedApp);
+  useEffect(() => {
+    const fetch = async () => {
+      setEnvGroups(await getEnv());
+    };
+    fetch();
+  }, []);
+
+  const currentGroup = envGroups[selectedApp];
 
   const toggleSecret = (key: string) => {
     setShowSecrets((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -70,23 +47,21 @@ export default function EnvironmentPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 flex gap-2 md:block overflow-x-auto">
-              {envGroups.map((group) => (
+              {Object.entries(envGroups).map(([key, variables]) => (
                 <button
-                  key={group.name}
-                  onClick={() => setSelectedApp(group.name)}
+                  key={key}
+                  onClick={() => setSelectedApp(key)}
                   className={`
                     whitespace-nowrap md:w-full text-left px-3 py-2 text-sm font-mono transition-colors
                     ${
-                      selectedApp === group.name
+                      selectedApp === key
                         ? "bg-secondary text-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }
                   `}
                 >
-                  {group.name}
-                  <Badge className="ml-2 text-[10px]">
-                    {group.variables.length}
-                  </Badge>
+                  {key}
+                  <Badge className="ml-2 text-[10px]">{variables.length}</Badge>
                 </button>
               ))}
             </CardContent>
@@ -100,9 +75,8 @@ export default function EnvironmentPage() {
               <div>
                 <CardTitle className="font-mono">{selectedApp}</CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {currentGroup?.variables.length} variables •{" "}
-                  {currentGroup?.variables.filter((v) => v.secret).length}{" "}
-                  secrets
+                  {currentGroup?.length} variables •{" "}
+                  {currentGroup?.filter((v) => v.secret).length} secrets
                 </p>
               </div>
 
@@ -128,7 +102,7 @@ export default function EnvironmentPage() {
 
               {/* Rows */}
               <div className="divide-y divide-border md:divide-none">
-                {currentGroup?.variables.map((variable) => (
+                {currentGroup?.map((variable) => (
                   <div
                     key={variable.key}
                     className="

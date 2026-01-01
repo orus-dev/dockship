@@ -81,3 +81,9 @@ export interface Log {
   source: string;
   message: string;
 }
+
+export interface Env {
+  key: string;
+  value: string;
+  secret: boolean;
+}

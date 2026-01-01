@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
-import { ImageApp } from "@/lib/types";
+import { Env, ImageApp } from "@/lib/types";
 import { CPUusage } from "@/lib/server/calc";
 
 const docker = new Docker();
@@ -100,6 +100,8 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
     JSON.stringify(appConfig, null, 2)
   );
 
+  fs.writeFileSync(path.join(appDir, "env.json"), JSON.stringify([], null, 2));
+
   // Clone repository
   try {
     await execAsync(`git clone ${repo} ${repoDir}`);
@@ -131,4 +133,20 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
     appId,
     image: imageTag,
   };
+}
+
+export async function getEnv(): Promise<Record<string, Env[]>> {
+  const apps = fs.readdirSync(DATA_DIR);
+
+  return apps.reduce((acc, appId) => {
+    const appPath = path.join(DATA_DIR, appId, "app.json");
+    const name = JSON.parse(fs.readFileSync(appPath).toString()).name;
+
+    const envPath = path.join(DATA_DIR, appId, "env.json");
+    if (fs.existsSync(envPath)) {
+      const envData: Env[] = JSON.parse(fs.readFileSync(envPath, "utf-8"));
+      acc[name] = envData;
+    }
+    return acc;
+  }, {} as Record<string, Env[]>);
 }

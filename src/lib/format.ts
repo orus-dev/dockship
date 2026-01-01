@@ -15,3 +15,10 @@ export function average<T>(values: Array<T>, p: (v: T) => number) {
     ? values.reduce((sum, value) => sum + p(value), 0) / values.length
     : 0;
 }
+
+export function mapRecord<T, U>(
+  input: Record<string, T>,
+  fn: ([key, value]: [string, T]) => [string, U]
+): Record<string, U> {
+  return Object.fromEntries(Object.entries(input).map(fn));
+}
