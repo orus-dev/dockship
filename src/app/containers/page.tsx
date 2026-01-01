@@ -1,10 +1,10 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Play, Square, Trash2, Container } from "lucide-react";
+import { MoreVertical, Play, Square, Container } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getDocker, removeContainer } from "@/core/docker";
 import { getNodes } from "@/core/node";
@@ -239,17 +239,23 @@ export default function ContainersPage() {
 
                 <div className="flex justify-end gap-1 pt-2">
                   {container.status === "running" ? (
-                    <Button variant="ghost" size="icon-sm">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => stopContainer(container.id)}
+                    >
                       <Square className="w-3 h-3" />
                     </Button>
                   ) : (
-                    <Button variant="ghost" size="icon-sm">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => startContainer(container.id)}
+                    >
                       <Play className="w-3 h-3" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon-sm">
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  <RemoveDialog remove={() => removeContainer(container.id)} />
                   <Button variant="ghost" size="icon-sm">
                     <MoreVertical className="w-3 h-3" />
                   </Button>

@@ -6,16 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  Trash2,
-  Eye,
-  EyeOff,
-  Copy,
-  Save,
-  Lock,
-  Loader2,
-} from "lucide-react";
+import { Trash2, Eye, EyeOff, Copy, Save, Lock, Loader2 } from "lucide-react";
 import { Env } from "@/lib/types";
 import { getEnv, setEnv } from "@/core/application";
 import { AddVariableDialog } from "@/components/dialogs/AddVariable";

@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Server, Plus, Settings, Trash2 } from "lucide-react";
+import { Server, Plus, Settings } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import { formatBytes } from "@/lib/format";
 import { setNodes as updateNodes } from "@/core/node";
 import AddNode from "@/components/dialogs/AddNode";
 import { getDocker } from "@/core/docker";
+import RemoveDialog from "@/components/dialogs/Remove";
 
 function DiskUsage({ liveData }: NodeLiveData) {
   if (!liveData) return null;
@@ -97,17 +98,13 @@ export default function NodesPage() {
                 <Button variant="ghost" size="icon-sm">
                   <Settings className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={async () => {
+                <RemoveDialog
+                  remove={async () => {
                     const newNodes = nodes.filter((_, index) => index !== i);
                     setNodes(newNodes);
                     await updateNodes(newNodes);
                   }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                />
               </div>
             </CardHeader>
             <CardContent>
