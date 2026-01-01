@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dockship",
+  title: `Dockship v${version}`,
   description: `Dockship v${version} https://github.com/orus-dev/dockship`,
 };
 
