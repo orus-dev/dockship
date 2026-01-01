@@ -82,8 +82,14 @@ export interface Log {
   message: string;
 }
 
-export interface Env {
+export interface EnvVariable {
   key: string;
   value: string;
   secret: boolean;
+}
+
+export interface Env {
+  id: string;
+  name: string;
+  variables: EnvVariable[];
 }

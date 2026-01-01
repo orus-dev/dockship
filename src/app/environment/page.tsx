@@ -6,18 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Eye, EyeOff, Copy, Save, Lock } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  Copy,
+  Save,
+  Lock,
+  Loader2,
+} from "lucide-react";
 import { Env } from "@/lib/types";
-import { getEnv } from "@/core/application";
+import { getEnv, setEnv } from "@/core/application";
+import { AddVariableDialog } from "@/components/dialogs/AddVariable";
 
 export default function EnvironmentPage() {
   const [selectedApp, setSelectedApp] = useState("");
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
-  const [envGroups, setEnvGroups] = useState<Record<string, Env[]>>({});
+  const [envGroups, setEnvGroups] = useState<Record<string, Env>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
-      setEnvGroups(await getEnv());
+      const env = await getEnv();
+      setEnvGroups(env);
+      const vars = Object.keys(env);
+      if (vars.length > 0) setSelectedApp(vars[0]);
     };
     fetch();
   }, []);
@@ -30,6 +44,17 @@ export default function EnvironmentPage() {
 
   const maskValue = (value: string) => {
     return "•".repeat(Math.min(value.length, 24));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await setEnv(selectedApp, currentGroup.variables);
+    } catch (error) {
+      console.error("Failed to save:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -47,21 +72,23 @@ export default function EnvironmentPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-2 flex gap-2 md:block overflow-x-auto">
-              {Object.entries(envGroups).map(([key, variables]) => (
+              {Object.entries(envGroups).map(([id, variables]) => (
                 <button
-                  key={key}
-                  onClick={() => setSelectedApp(key)}
+                  key={id}
+                  onClick={() => setSelectedApp(id)}
                   className={`
                     whitespace-nowrap md:w-full text-left px-3 py-2 text-sm font-mono transition-colors
                     ${
-                      selectedApp === key
+                      selectedApp === id
                         ? "bg-secondary text-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }
                   `}
                 >
-                  {key}
-                  <Badge className="ml-2 text-[10px]">{variables.length}</Badge>
+                  {variables.name}
+                  <Badge className="ml-2 text-[10px]">
+                    {variables.variables.length}
+                  </Badge>
                 </button>
               ))}
             </CardContent>
@@ -75,19 +102,32 @@ export default function EnvironmentPage() {
               <div>
                 <CardTitle className="font-mono">{selectedApp}</CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {currentGroup?.length} variables •{" "}
-                  {currentGroup?.filter((v) => v.secret).length} secrets
+                  {currentGroup?.variables.length} variables •{" "}
+                  {currentGroup?.variables.filter((v) => v.secret).length}{" "}
+                  secrets
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Add Variable</span>
-                </Button>
-                <Button size="sm" className="gap-2">
-                  <Save className="w-4 h-4" />
-                  <span className="hidden sm:inline">Save Changes</span>
+                <AddVariableDialog
+                  selectedApp={selectedApp}
+                  currentGroup={currentGroup}
+                  setEnvGroups={setEnvGroups}
+                />
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </span>
                 </Button>
               </div>
             </CardHeader>
@@ -102,7 +142,7 @@ export default function EnvironmentPage() {
 
               {/* Rows */}
               <div className="divide-y divide-border md:divide-none">
-                {currentGroup?.map((variable) => (
+                {currentGroup?.variables.map((variable) => (
                   <div
                     key={variable.key}
                     className="

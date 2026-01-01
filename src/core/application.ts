@@ -3,7 +3,7 @@
 import { verifySession } from "./auth/session";
 import { getNodes } from "./node";
 import axios from "axios";
-import { Env, ImageApp } from "@/lib/types";
+import { Env, EnvVariable, ImageApp } from "@/lib/types";
 
 export async function deployNewApp(name: string, repo: string, nodeId: string) {
   if (await verifySession()) {
@@ -42,7 +42,7 @@ export async function getApplications(): Promise<ImageApp[]> {
   ).flat();
 }
 
-export async function getEnv(): Promise<Record<string, Env[]>> {
+export async function getEnv(): Promise<Record<string, Env>> {
   const nodes = await getNodes();
 
   const envRecords = await Promise.all(
@@ -50,11 +50,25 @@ export async function getEnv(): Promise<Record<string, Env[]>> {
       const response = await axios.get(`http://${n.ip}:3000/api/env`, {
         headers: { Authorization: `ApiKey ${n.key}` },
       });
-      return response.data as Record<string, Env[]>;
+      return response.data as Record<string, Env>;
     })
   );
 
-  const merged: Record<string, Env[]> = Object.assign({}, ...envRecords);
+  const merged: Record<string, Env> = Object.assign({}, ...envRecords);
 
   return merged;
+}
+
+export async function setEnv(appId: string, variables: EnvVariable[]) {
+  const nodes = await getNodes();
+
+  nodes.forEach(async (n) => {
+    await axios.post(
+      `http://${n.ip}:3000/api/env`,
+      { appId, variables },
+      {
+        headers: { Authorization: `ApiKey ${n.key}` },
+      }
+    );
+  });
 }

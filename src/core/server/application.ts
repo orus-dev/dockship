@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
-import { Env, ImageApp } from "@/lib/types";
+import { Env, EnvVariable, ImageApp } from "@/lib/types";
 import { CPUusage } from "@/lib/server/calc";
 
 const docker = new Docker();
@@ -135,7 +135,7 @@ export async function deployNewApp(name: string, repo: string, nodeId: string) {
   };
 }
 
-export async function getEnv(): Promise<Record<string, Env[]>> {
+export async function getEnv(): Promise<Record<string, Env>> {
   const apps = fs.readdirSync(DATA_DIR);
 
   return apps.reduce((acc, appId) => {
@@ -144,9 +144,23 @@ export async function getEnv(): Promise<Record<string, Env[]>> {
 
     const envPath = path.join(DATA_DIR, appId, "env.json");
     if (fs.existsSync(envPath)) {
-      const envData: Env[] = JSON.parse(fs.readFileSync(envPath, "utf-8"));
-      acc[name] = envData;
+      const envData: EnvVariable[] = JSON.parse(
+        fs.readFileSync(envPath, "utf-8")
+      );
+      acc[appId] = { variables: envData, id: appId, name };
     }
     return acc;
-  }, {} as Record<string, Env[]>);
+  }, {} as Record<string, Env>);
+}
+
+export async function setEnv(appId: string, variables: EnvVariable[]) {
+  const apps = fs.readdirSync(DATA_DIR);
+
+  apps.forEach((id) => {
+    if (id === appId) {
+      const envPath = path.join(DATA_DIR, appId, "env.json");
+
+      fs.writeFileSync(envPath, JSON.stringify(variables));
+    }
+  });
 }
