@@ -20,6 +20,8 @@ export function DashboardLayout({
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // document.title = `DOCKSHIP | ${title}`;
+
   useEffect(() => {
     setSidebarOpen(Cookies.get("sidebar_state") !== "false");
     setMounted(true);

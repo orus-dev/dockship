@@ -1,8 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="https://orus-dev.netlify.app/projects"><img src="public/dockship.svg" alt="DockShip" width="350"></a>
+  <a href="https://orus-dev.netlify.app/projects"><img src="public/dockship.svg" alt="Dockship" width="350"></a>
   <br>
-  DockShip
+  Dockship
   <br>
 </h1>
 
@@ -20,7 +20,7 @@
 
 #### Core Deployment
 
-- **Easy Deployment** - Deploy Dockerized applications in just a few clicks. Provide your app name, repository, and Docker image, and DockShip handles the rest.
+- **Easy Deployment** - Deploy Dockerized applications in just a few clicks. Provide your app name, repository, and Docker image, and Dockship handles the rest.
 - **Docker Integration** - Pull and run images from any registry. Validate Dockerfiles and optionally build images from repositories.
 
 #### Application Management

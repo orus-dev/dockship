@@ -55,7 +55,7 @@ export function DashboardSidebar() {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-primary-foreground">
                   <Image
                     src="/dockship.svg"
-                    alt="DockShip"
+                    alt="Dockship"
                     width={24}
                     height={24}
                   />
