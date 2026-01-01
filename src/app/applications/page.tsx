@@ -4,9 +4,9 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Square, MoreVertical, Plus } from "lucide-react";
+import { Play, Square, MoreVertical, Plus, Rocket } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import DeployApplication from "@/components/dialogs/DeployApplication";
+import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
 import { useEffect, useState } from "react";
 import { ImageApp } from "@/lib/types";
 import { getApplications, removeApp } from "@/core/application";
@@ -34,7 +34,7 @@ export default function ApplicationsPage() {
   return (
     <DashboardLayout
       title="Applications"
-      subtitle="Manage deployed applications"
+      subtitle="Manage installed applications"
     >
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -45,12 +45,12 @@ export default function ApplicationsPage() {
           </Badge>
         </div>
 
-        <DeployApplication>
+        <InstallApplicationDialog>
           <Button size="sm" className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
-            Deploy Application
+            Install Application
           </Button>
-        </DeployApplication>
+        </InstallApplicationDialog>
       </div>
 
       <div className="space-y-3">
@@ -137,7 +137,7 @@ export default function ApplicationsPage() {
                     </Button>
                   ) : (
                     <Button variant="ghost" size="icon-sm">
-                      <Play className="w-3 h-3" />
+                      <Rocket className="w-3 h-3" />
                     </Button>
                   )}
                   <RemoveDialog

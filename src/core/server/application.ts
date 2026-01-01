@@ -77,7 +77,7 @@ export async function getApplications(): Promise<ImageApp[]> {
   return apps;
 }
 
-export async function deployNewApp(name: string, repo: string, nodeId: string) {
+export async function installApp(name: string, repo: string, nodeId: string) {
   // Create app ID
   const appId = `app_${randomUUID()}`;
   const appDir = path.join(DATA_DIR, appId);

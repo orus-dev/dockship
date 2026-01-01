@@ -16,9 +16,9 @@ import { Label } from "@/components/ui/label";
 import { getLiveNodes } from "@/core/node";
 import { Combobox } from "../ui/combobox";
 import { Node, NodeLiveData } from "@/lib/types";
-import { deployNewApp } from "@/core/application";
+import { installApp } from "@/core/application";
 
-export default function DeployApplication({
+export default function InstallApplicationDialog({
   children,
 }: {
   children: ReactNode;
@@ -36,7 +36,7 @@ export default function DeployApplication({
   }, []);
 
   const deploy = async () => {
-    console.log(await deployNewApp(name, repo, node));
+    console.log(await installApp(name, repo, node));
   };
 
   return (
@@ -45,7 +45,7 @@ export default function DeployApplication({
 
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Deploy Application</DialogTitle>
+          <DialogTitle>Install Application</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4">

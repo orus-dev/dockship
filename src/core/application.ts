@@ -5,7 +5,7 @@ import { getNodes } from "./node";
 import axios from "axios";
 import { Env, EnvVariable, ImageApp } from "@/lib/types";
 
-export async function deployNewApp(name: string, repo: string, nodeId: string) {
+export async function installApp(name: string, repo: string, nodeId: string) {
   if (await verifySession()) {
     throw new Error("Unauthorized");
   }

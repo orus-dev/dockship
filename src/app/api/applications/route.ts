@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
 import {
-  deployNewApp,
+  installApp,
   getApplications,
   removeApp,
 } from "@/core/server/application";
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const res = await deployNewApp(name, repo, nodeId);
+  const res = await installApp(name, repo, nodeId);
 
   return NextResponse.json({
     message: "ok",
