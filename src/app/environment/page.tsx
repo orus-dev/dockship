@@ -142,7 +142,7 @@ export default function EnvironmentPage() {
 
               {/* Rows */}
               <div className="divide-y divide-border md:divide-none">
-                {currentGroup?.variables.map((variable) => (
+                {currentGroup?.variables.map((variable, i) => (
                   <div
                     key={variable.key}
                     className="
@@ -192,10 +192,34 @@ export default function EnvironmentPage() {
                           )}
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon-sm">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="hover:text-primary"
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            `${variable.key}=${variable.value}`
+                          )
+                        }
+                      >
                         <Copy className="w-3 h-3" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="hover:text-destructive"
+                        onClick={() => {
+                          setEnvGroups((env) => ({
+                            ...env,
+                            [selectedApp]: {
+                              ...env[selectedApp],
+                              variables: env[selectedApp].variables.filter(
+                                (_, iv) => iv !== i
+                              ),
+                            },
+                          }));
+                        }}
+                      >
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
