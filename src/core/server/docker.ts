@@ -15,7 +15,15 @@ export async function getDocker() {
 export async function getContainerStats(
   containerId: string
 ): Promise<SimpleStats | undefined> {
-  const stats = await docker.getContainer(containerId).stats({ stream: false });
+  const container = docker.getContainer(containerId);
+
+  const data = await container.inspect();
+
+  if (!data.State.Running) {
+    return;
+  }
+
+  const stats = await container.stats({ stream: false });
 
   return {
     cpu: CPUusage(stats),

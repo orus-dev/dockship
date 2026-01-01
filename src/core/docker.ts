@@ -35,7 +35,7 @@ export async function getContainerStats(
               headers: { Authorization: `ApiKey ${n.key}` },
               params: { containerId },
             })
-          ).data
+          ).data?.stats
       )
     )
   ).find((s) => s);

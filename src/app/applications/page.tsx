@@ -4,12 +4,13 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Square, RotateCcw, MoreVertical, Plus } from "lucide-react";
+import { Play, Square, MoreVertical, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import DeployApplication from "@/components/dialogs/DeployApplication";
 import { useEffect, useState } from "react";
 import { ImageApp } from "@/lib/types";
-import { getApplications } from "@/core/application";
+import { getApplications, removeApp } from "@/core/application";
+import RemoveDialog from "@/components/dialogs/Remove";
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<ImageApp[]>([]);
@@ -24,6 +25,11 @@ export default function ApplicationsPage() {
     const iid = setInterval(fetch, 3000);
     return () => clearInterval(iid);
   }, []);
+
+  const remove = async (appId: string) => {
+    await removeApp(appId);
+    setApplications((prev) => prev.filter((app) => app.id !== appId));
+  };
 
   return (
     <DashboardLayout
@@ -134,9 +140,9 @@ export default function ApplicationsPage() {
                       <Play className="w-3 h-3" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon-sm">
-                    <RotateCcw className="w-3 h-3" />
-                  </Button>
+                  <RemoveDialog
+                    remove={() => app.app?.id && remove(app.app?.id)}
+                  />
                   <Button variant="ghost" size="icon-sm">
                     <MoreVertical className="w-3 h-3" />
                   </Button>

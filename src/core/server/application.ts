@@ -164,3 +164,11 @@ export async function setEnv(appId: string, variables: EnvVariable[]) {
     }
   });
 }
+
+export async function removeApp(appId: string) {
+  const imageTag = `dockship/${appId}:latest`;
+  const image = docker.getImage(imageTag);
+  await image.remove();
+  const appPath = path.join(DATA_DIR, appId);
+  fs.rmSync(appPath, { recursive: true });
+}

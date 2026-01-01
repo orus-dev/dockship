@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { deployNewApp, getApplications } from "@/core/server/application";
+import {
+  deployNewApp,
+  getApplications,
+  removeApp,
+} from "@/core/server/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -45,5 +49,30 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   return NextResponse.json({
     message: "ok",
     ...res,
+  });
+}
+
+export async function DELETE(req: NextRequest): Promise<NextResponse> {
+  const auth = await testAuth(req);
+  const appId = req.nextUrl.searchParams.get("appId");
+
+  if (auth) {
+    return NextResponse.json(
+      { message: auth },
+      { status: StatusCodes.UNAUTHORIZED }
+    );
+  }
+
+  if (!appId) {
+    return NextResponse.json(
+      { message: "Missing param appId" },
+      { status: StatusCodes.BAD_REQUEST }
+    );
+  }
+
+  await removeApp(appId);
+
+  return NextResponse.json({
+    message: "ok",
   });
 }

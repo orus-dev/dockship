@@ -15,17 +15,7 @@ import {
   startContainer,
   stopContainer,
 } from "@/core/docker";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+import RemoveDialog from "@/components/dialogs/Remove";
 
 type ContainerSummary = {
   id: string;
@@ -68,39 +58,6 @@ async function summarizeContainer(
   };
 }
 
-function RemoveDialog({ container }: { container: ContainerSummary }) {
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon-sm">
-          <Trash2 className="w-3 h-3 text-destructive" />
-        </Button>
-      </AlertDialogTrigger>
-
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently remove the
-            container.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-          <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => removeContainer(container.id)}
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 export default function ContainersPage() {
   const [containers, setContainers] = useState<ContainerSummary[]>([]);
 
@@ -121,6 +78,9 @@ export default function ContainersPage() {
     };
 
     fetchNodes();
+
+    const iid = setInterval(fetchNodes, 3000);
+    return () => clearInterval(iid);
   }, []);
 
   return (
@@ -221,7 +181,9 @@ export default function ContainersPage() {
                             <Play className="w-3 h-3" />
                           </Button>
                         )}
-                        <RemoveDialog container={container} />
+                        <RemoveDialog
+                          remove={() => removeContainer(container.id)}
+                        />
                         <Button variant="ghost" size="icon-sm">
                           <MoreVertical className="w-3 h-3" />
                         </Button>

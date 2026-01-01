@@ -25,9 +25,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({
     message: "ok",
-    stats: {
-      cpu_stats: stats?.cpu_stats,
-      memory_stats: stats?.memory_stats,
-    },
+    stats,
   });
 }

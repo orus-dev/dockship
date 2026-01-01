@@ -72,3 +72,14 @@ export async function setEnv(appId: string, variables: EnvVariable[]) {
     );
   });
 }
+
+export async function removeApp(appId: string) {
+  const nodes = await getNodes();
+
+  nodes.forEach(async (n) => {
+    await axios.delete(`http://${n.ip}:3000/api/applications`, {
+      params: { appId },
+      headers: { Authorization: `ApiKey ${n.key}` },
+    });
+  });
+}
