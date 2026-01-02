@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { getApplications, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
 import { Application } from "@/lib/types";
+import DeployAppDialog from "@/components/dialogs/DeployApp";
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -75,9 +76,11 @@ export default function ApplicationsPage() {
             </CardContent>
 
             <CardFooter className="justify-end">
-              <Button variant="ghost" size="icon-sm" aria-label="Deploy">
-                <Rocket className="w-3 h-3" />
-              </Button>
+              <DeployAppDialog defaultApp={app.id}>
+                <Button variant="ghost" size="icon-sm" aria-label="Deploy">
+                  <Rocket className="w-3 h-3" />
+                </Button>
+              </DeployAppDialog>
 
               <RemoveDialog remove={() => remove(app.id)} />
 

@@ -82,7 +82,8 @@ export default function DeploymentsPage() {
       {/* Desktop */}
       <div className="hidden md:block space-y-3">
         {deployments.map((dep) => {
-          const appName = appNameByContainer.get(dep.container) ?? "Unknown app";
+          const appName =
+            appNameByContainer.get(dep.container) ?? "Unknown app";
 
           return (
             <div
@@ -128,7 +129,7 @@ export default function DeploymentsPage() {
             appNameByContainer.get(dep.container) ?? "Unknown app";
 
           return (
-            <div key={`${dep.image}-mobile`} className="p-4 space-y-3">
+            <div key={`${dep.container}-mobile`} className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Rocket className="w-4 h-4 text-muted-foreground" />

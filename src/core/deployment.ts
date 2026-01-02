@@ -5,6 +5,7 @@ import { Application, Deployment } from "@/lib/types";
 import { CPUusage } from "@/lib/server/calc";
 import path from "path";
 import fs from "fs";
+import pLimit from "p-limit";
 
 const docker = new Docker();
 
@@ -18,46 +19,76 @@ function sanitizeString(str: string): string {
 
 export async function getDeployments(
   apps: Application[]
-): Promise<(null | Deployment)[]> {
-  return await Promise.all(
-    apps
-      .map((app) => app.deployments)
-      .flat()
-      .map(async (deployId) => {
-        const container = docker.getContainer(deployId);
-        const containerInfo = await container.inspect();
+): Promise<Deployment[]> {
+  // Limit concurrent Docker calls (adjust if needed)
+  const limit = pLimit(5);
 
-        let cpu = 0;
-        let memory = 0;
-        let ports: Set<[number, number]> = new Set();
+  const deploymentIds = apps.flatMap((app) => app.deployments);
 
-        if (containerInfo.State.Running) {
-          const stats = await container.stats({ stream: false });
-          memory += (stats.memory_stats.usage / stats.memory_stats.limit) * 100;
-          cpu += CPUusage(stats);
-        }
+  const results = await Promise.all(
+    deploymentIds.map((deployId) =>
+      limit(async (): Promise<Deployment | null> => {
+        try {
+          const container = docker.getContainer(deployId);
+          const containerInfo = await container.inspect();
 
-        for (const [key, mappings] of Object.entries(
-          containerInfo.NetworkSettings.Ports
-        )) {
-          const privatePort = parseInt(key.split("/")[0], 10);
-          if (mappings) {
+          let cpu = 0;
+          let memory = 0;
+
+          // Use Map to deduplicate ports reliably
+          const ports = new Map<number, number>();
+
+          if (containerInfo.State?.Running) {
+            const stats = await container.stats({ stream: false });
+
+            const usage = stats.memory_stats?.usage ?? 0;
+            const limitMem = stats.memory_stats?.limit ?? 0;
+
+            if (limitMem > 0) {
+              memory = (usage / limitMem) * 100;
+            }
+
+            cpu = CPUusage(stats);
+          }
+
+          const portMappings = containerInfo.NetworkSettings?.Ports ?? {};
+
+          for (const [key, mappings] of Object.entries(portMappings)) {
+            if (!mappings) continue;
+
+            const privatePort = Number.parseInt(key.split("/")[0], 10);
+
             for (const mapping of mappings) {
-              const publicPort = parseInt(mapping.HostPort, 10);
-              ports.add([publicPort, privatePort]);
+              const publicPort = Number.parseInt(mapping.HostPort, 10);
+
+              if (!Number.isNaN(publicPort) && !Number.isNaN(privatePort)) {
+                ports.set(publicPort, privatePort);
+              }
             }
           }
-        }
 
-        return {
-          image: containerInfo.Image,
-          container: containerInfo.Id,
-          cpu,
-          memory,
-          status: containerInfo.State.Running ? "running" : "stopped",
-          ports: [...ports],
-        };
+          return {
+            image: containerInfo.Image,
+            container: containerInfo.Id,
+            cpu,
+            memory,
+            status: containerInfo.State?.Running ? "running" : "stopped",
+            ports: [...ports.entries()].map(
+              ([publicPort, privatePort]) =>
+                [publicPort, privatePort] as [number, number]
+            ),
+          };
+        } catch {
+          // Container may have stopped / been removed
+          return null;
+        }
       })
+    )
+  );
+
+  // Remove failed containers
+  return results.filter(
+    (deployment: any): deployment is Deployment => deployment !== null
   );
 }
 

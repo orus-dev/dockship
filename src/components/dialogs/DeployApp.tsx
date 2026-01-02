@@ -19,12 +19,18 @@ import { Application, Node, NodeLiveData } from "@/lib/types";
 import { getApplications } from "@/core/application";
 import { deployApp } from "@/lib/dockship/deploy";
 
-export default function DeployAppDialog({ children }: { children: ReactNode }) {
+export default function DeployAppDialog({
+  defaultApp,
+  children,
+}: {
+  defaultApp?: string;
+  children: ReactNode;
+}) {
   const [nodeList, setNodeList] = useState<(NodeLiveData & Node)[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
 
   const [name, setName] = useState("");
-  const [app, setApp] = useState("");
+  const [app, setApp] = useState(defaultApp || "");
   const [node, setNode] = useState("");
 
   useEffect(() => {
