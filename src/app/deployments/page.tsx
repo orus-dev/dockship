@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Application, Deployment } from "@/lib/types";
-import { getDeployments } from "@/core/deployment";
+import { getDeployments } from "@/lib/dockship/deploy";
 import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +24,8 @@ export default function DeploymentsPage() {
 
   useEffect(() => {
     const fetch = async () => {
-      const apps = await getApplications();
-      setApplications(apps);
-      setDeployments((await getDeployments(apps)).filter((d) => d !== null));
+      setApplications(await getApplications());
+      setDeployments((await getDeployments()).filter((d) => d !== null));
     };
     fetch();
   }, []);
