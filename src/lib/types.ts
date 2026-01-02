@@ -79,7 +79,6 @@ export interface Log {
 }
 
 export interface EnvVariable {
-  key: string;
   value: string;
   secret: boolean;
 }
@@ -87,5 +86,5 @@ export interface EnvVariable {
 export interface Env {
   id: string;
   name: string;
-  variables: EnvVariable[];
+  variables: Record<string, EnvVariable>;
 }

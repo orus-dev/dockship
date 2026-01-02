@@ -59,7 +59,10 @@ export async function getEnv(): Promise<Record<string, Env>> {
   return merged;
 }
 
-export async function setEnv(appId: string, variables: EnvVariable[]) {
+export async function setEnv(
+  appId: string,
+  variables: Record<string, EnvVariable>
+) {
   const nodes = await getNodes();
 
   nodes.forEach(async (n) => {

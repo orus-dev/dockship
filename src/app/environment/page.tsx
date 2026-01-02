@@ -33,16 +33,6 @@ export default function EnvironmentPage() {
     fetch();
   }, []);
 
-  const currentGroup = envGroups[selectedApp];
-
-  const toggleSecret = (key: string) => {
-    setShowSecrets((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const maskValue = (value: string) => {
-    return "•".repeat(Math.min(value.length, 24));
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -52,6 +42,12 @@ export default function EnvironmentPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const currentGroup = envGroups[selectedApp] || {
+    id: "",
+    name: "",
+    variables: {},
   };
 
   return (
@@ -90,8 +86,12 @@ export default function EnvironmentPage() {
               </DropdownMenu>
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              {currentGroup?.variables.length} variables •{" "}
-              {currentGroup?.variables.filter((v) => v.secret).length} secrets
+              {Object.keys(currentGroup?.variables).length} variables •{" "}
+              {
+                Object.values(currentGroup?.variables).filter((v) => v.secret)
+                  .length
+              }{" "}
+              secrets
             </p>
           </div>
 
@@ -129,9 +129,9 @@ export default function EnvironmentPage() {
 
           {/* Rows */}
           <div className="divide-y divide-border md:divide-none">
-            {currentGroup?.variables.map((variable, i) => (
+            {Object.entries(currentGroup?.variables).map(([key, variable]) => (
               <div
-                key={variable.key}
+                key={key}
                 className="
                       py-4 md:py-3
                       flex flex-col gap-3
@@ -141,23 +141,33 @@ export default function EnvironmentPage() {
                 {/* Key */}
                 <div className="md:col-span-4 flex items-center gap-2">
                   {variable.secret && <Lock className="w-3 h-3 text-warning" />}
-                  <span className="font-mono text-sm">{variable.key}</span>
+                  <span className="font-mono text-sm">{key}</span>
                 </div>
 
                 {/* Value */}
                 <div className="md:col-span-6">
                   <Input
                     type={
-                      variable.secret && !showSecrets[variable.key]
-                        ? "password"
-                        : "text"
+                      variable.secret && !showSecrets[key] ? "password" : "text"
                     }
-                    value={
-                      variable.secret && !showSecrets[variable.key]
-                        ? maskValue(variable.value)
-                        : variable.value
-                    }
-                    readOnly
+                    value={variable.value}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+
+                      setEnvGroups((prev) => ({
+                        ...prev,
+                        [selectedApp]: {
+                          ...prev[selectedApp],
+                          variables: {
+                            ...prev[selectedApp].variables,
+                            [key]: {
+                              ...prev[selectedApp].variables[key],
+                              value: newValue,
+                            },
+                          },
+                        },
+                      }));
+                    }}
                     className="font-mono text-xs h-8 bg-background border-border"
                   />
                 </div>
@@ -168,9 +178,14 @@ export default function EnvironmentPage() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => toggleSecret(variable.key)}
+                      onClick={() =>
+                        setShowSecrets((prev) => ({
+                          ...prev,
+                          [key]: !prev[key],
+                        }))
+                      }
                     >
-                      {showSecrets[variable.key] ? (
+                      {showSecrets[key] ? (
                         <EyeOff className="w-3 h-3" />
                       ) : (
                         <Eye className="w-3 h-3" />
@@ -182,9 +197,7 @@ export default function EnvironmentPage() {
                     size="icon-sm"
                     className="hover:text-primary"
                     onClick={() =>
-                      navigator.clipboard.writeText(
-                        `${variable.key}=${variable.value}`
-                      )
+                      navigator.clipboard.writeText(`${key}=${variable.value}`)
                     }
                   >
                     <Copy className="w-3 h-3" />
@@ -194,15 +207,18 @@ export default function EnvironmentPage() {
                     size="icon-sm"
                     className="hover:text-destructive"
                     onClick={() => {
-                      setEnvGroups((env) => ({
-                        ...env,
-                        [selectedApp]: {
-                          ...env[selectedApp],
-                          variables: env[selectedApp].variables.filter(
-                            (_, iv) => iv !== i
-                          ),
-                        },
-                      }));
+                      setEnvGroups((prev) => {
+                        const { [key]: _, ...restVars } =
+                          prev[selectedApp].variables;
+
+                        return {
+                          ...prev,
+                          [selectedApp]: {
+                            ...prev[selectedApp],
+                            variables: restVars,
+                          },
+                        };
+                      });
                     }}
                   >
                     <Trash2 className="w-3 h-3" />
