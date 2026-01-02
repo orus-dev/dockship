@@ -103,9 +103,26 @@ export async function setEnv(appId: string, variables: EnvVariable[]) {
 }
 
 export async function removeApp(appId: string) {
-  const imageTag = `dockship/${appId}:latest`;
-  const image = docker.getImage(imageTag);
-  await image.remove();
   const appPath = path.join(DATA_DIR, appId);
+
+  const appMeta: Application = JSON.parse(
+    fs.readFileSync(path.join(appPath, "app.json")).toString()
+  );
+
+  appMeta.deployments.forEach(async (imgId) => {
+    // Remove containers
+    (await docker.listContainers({ all: true }))
+      .filter((con) => con.ImageID === imgId)
+      .forEach((con) => {
+        const container = docker.getContainer(con.Id);
+        container.stop();
+        container.remove();
+      });
+
+    // Remove image
+    const image = docker.getImage(imgId);
+    image.remove();
+  });
+
   fs.rmSync(appPath, { recursive: true });
 }
