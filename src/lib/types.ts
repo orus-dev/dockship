@@ -62,7 +62,7 @@ export interface Deployment {
   container: string;
   cpu: number;
   memory: number;
-  status: "running" | "stopped";
+  status: "running" | "stopped" | "pending";
   ports: [number, number][];
 }
 
