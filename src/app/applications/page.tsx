@@ -1,7 +1,14 @@
 "use client";
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
@@ -50,48 +57,34 @@ export default function ApplicationsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {applications.map((app) => (
           <Card key={app.id}>
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-4">
-                {/* Status & Name */}
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="min-w-0">
-                    <div className="font-mono text-sm font-medium truncate">
-                      {app.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground font-mono truncate">
-                      {app.repo}
-                    </div>
-                  </div>
-                </div>
+            <CardHeader>
+              <CardTitle>{app.name}</CardTitle>
+              <CardDescription>{app.repo}</CardDescription>
+            </CardHeader>
 
-                {/* Deployments */}
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">
-                    Deployments
-                  </span>
-                  <span className="font-mono text-sm">
-                    {app.deployments?.length ?? 0}
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-1">
-                  <Button variant="ghost" size="icon-sm" aria-label="Deploy">
-                    <Rocket className="w-3 h-3" />
-                  </Button>
-
-                  {app.id && <RemoveDialog remove={() => remove(app.id)} />}
-
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="More options"
-                  >
-                    <MoreVertical className="w-3 h-3" />
-                  </Button>
-                </div>
+            <CardContent className="flex flex-col gap-2">
+              {/* Deployments */}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">
+                  Deployments
+                </span>
+                <span className="font-mono text-sm">
+                  {app.deployments?.length ?? 0}
+                </span>
               </div>
             </CardContent>
+
+            <CardFooter className="justify-end">
+              <Button variant="ghost" size="icon-sm" aria-label="Deploy">
+                <Rocket className="w-3 h-3" />
+              </Button>
+
+              <RemoveDialog remove={() => remove(app.id)} />
+
+              <Button variant="ghost" size="icon-sm" aria-label="More options">
+                <MoreVertical className="w-3 h-3" />
+              </Button>
+            </CardFooter>
           </Card>
         ))}
       </div>
