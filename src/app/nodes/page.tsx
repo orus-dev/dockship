@@ -8,11 +8,11 @@ import { Server, Plus, Settings } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Docker, Node, NodeLiveData } from "@/lib/types";
 import { useEffect, useState } from "react";
-import { getLiveNodes } from "@/core/node";
+import { getLiveNodes } from "@/lib/dockship/node";
 import { formatBytes } from "@/lib/format";
-import { setNodes as updateNodes } from "@/core/node";
+import { setNodes as updateNodes } from "@/lib/dockship/node";
 import AddNode from "@/components/dialogs/AddNode";
-import { getDocker } from "@/core/docker";
+import { getDocker } from "@/lib/dockship/docker";
 import RemoveDialog from "@/components/dialogs/Remove";
 
 function DiskUsage({ liveData }: NodeLiveData) {

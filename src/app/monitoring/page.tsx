@@ -5,13 +5,13 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
-import { getMetrics } from "@/core/metrics";
+import { getMetrics } from "@/lib/dockship/metrics";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
-import { getLiveNodes, getNodes } from "@/core/node";
+import { getLiveNodes, getNodes } from "@/lib/dockship/node";
 import { average } from "@/lib/format";
-import { getContainerStats, getDocker } from "@/core/docker";
+import { getContainerStats, getDocker } from "@/lib/dockship/docker";
 import { SimpleStats } from "@/lib/types";
 
 const cpuChartConfig = {

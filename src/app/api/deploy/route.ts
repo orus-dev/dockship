@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { getEnv, setEnv } from "@/core/application";
+import { deployApp, getDeployments } from "@/core/deployment";
+import { getApplications } from "@/core/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -13,11 +14,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  return NextResponse.json(await getEnv());
+  const apps = await getApplications();
+
+  const applications = await getDeployments(apps);
+
+  return NextResponse.json({
+    message: "ok",
+    applications,
+  });
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
+  const { name, appId }: { name: string; appId: string } = await req.json();
 
   if (auth) {
     return NextResponse.json(
@@ -26,16 +35,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const { appId, variables } = await req.json();
-
-  if (!appId || !variables) {
+  if (!name || !appId) {
     return NextResponse.json(
-      { message: "Missing appId, variables in body" },
+      { message: "Body missing name, appId, nodeId" },
       { status: StatusCodes.BAD_REQUEST }
     );
   }
 
-  await setEnv(appId, variables);
+  const deployId = await deployApp(name, appId);
 
-  return NextResponse.json({ message: "ok", success: true });
+  return NextResponse.json({
+    message: "ok",
+    deployId,
+  });
 }

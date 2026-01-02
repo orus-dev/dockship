@@ -34,12 +34,18 @@ export function AddVariableDialog({
 
   const handleAdd = () => {
     if (!key) return;
-    const newVariable: EnvVariable = { key, value, secret };
-    setEnvGroups((env) => ({
-      ...env,
+
+    setEnvGroups((prev) => ({
+      ...prev,
       [selectedApp]: {
-        ...currentGroup,
-        variables: [...currentGroup.variables, newVariable],
+        ...prev[selectedApp],
+        variables: {
+          ...prev[selectedApp].variables,
+          [key]: {
+            value,
+            secret,
+          },
+        },
       },
     }));
 

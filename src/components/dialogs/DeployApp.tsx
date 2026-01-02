@@ -15,28 +15,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
-import { Node, NodeLiveData } from "@/lib/types";
-import { installApp } from "@/lib/dockship/application";
+import { Application, Node, NodeLiveData } from "@/lib/types";
+import { getApplications } from "@/core/application";
+import { deployApp } from "@/lib/dockship/deploy";
 
-export default function InstallApplicationDialog({
+export default function DeployAppDialog({
+  defaultApp,
   children,
 }: {
+  defaultApp?: string;
   children: ReactNode;
 }) {
   const [nodeList, setNodeList] = useState<(NodeLiveData & Node)[]>([]);
+  const [apps, setApps] = useState<Application[]>([]);
+
   const [name, setName] = useState("");
-  const [repo, setRepo] = useState("");
+  const [app, setApp] = useState(defaultApp || "");
   const [node, setNode] = useState("");
 
   useEffect(() => {
     const fetchNodes = async () => {
       setNodeList(await getLiveNodes());
+      setApps(await getApplications());
     };
     fetchNodes();
   }, []);
 
   const deploy = async () => {
-    console.log(await installApp(name, repo, node));
+    console.log(name, app, node);
+    await deployApp(name, app, node);
   };
 
   return (
@@ -45,13 +52,13 @@ export default function InstallApplicationDialog({
 
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Install Application</DialogTitle>
+          <DialogTitle>Deploy Application</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4">
           <div className="grid gap-3">
             <Label htmlFor="name">
-              Application name <span className="text-destructive">*</span>
+              Deployment name <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
@@ -63,13 +70,17 @@ export default function InstallApplicationDialog({
 
           <div className="grid gap-3">
             <Label htmlFor="repo">
-              Repository <span className="text-destructive">*</span>
+              Application <span className="text-destructive">*</span>
             </Label>
-            <Input
-              id="repo"
-              value={repo}
-              onChange={(e) => setRepo(e.target.value)}
-              placeholder="https://github.com/me/myrepo.git"
+            <Combobox
+              value={app}
+              setValue={setApp}
+              data={apps.map((app) => ({
+                label: app.name,
+                value: app.id,
+              }))}
+              placeholder="Select App..."
+              listPlaceholder="No apps found :("
             />
           </div>
 

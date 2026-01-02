@@ -16,48 +16,25 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { getLiveNodes } from "@/core/node";
-import { useEffect, useState } from "react";
-import { Application, Docker, Node, NodeLiveData } from "@/lib/types";
-import { getDocker } from "@/core/docker";
-import { getApplications } from "@/core/application";
+import { getLiveNodes } from "@/lib/dockship/node";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Application,
+  Deployment,
+  Docker,
+  Node,
+  NodeLiveData,
+} from "@/lib/types";
+import { getDocker } from "@/lib/dockship/docker";
+import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
-
-const recentDeployments = [
-  {
-    id: "dep-001",
-    app: "api-gateway",
-    version: "v2.4.1",
-    status: "running" as const,
-    time: "2m ago",
-  },
-  {
-    id: "dep-002",
-    app: "auth-service",
-    version: "v1.8.0",
-    status: "running" as const,
-    time: "15m ago",
-  },
-  {
-    id: "dep-003",
-    app: "worker-queue",
-    version: "v3.1.2",
-    status: "pending" as const,
-    time: "32m ago",
-  },
-  {
-    id: "dep-004",
-    app: "metrics-collector",
-    version: "v1.2.0",
-    status: "error" as const,
-    time: "1h ago",
-  },
-];
+import { getDeployments } from "@/lib/dockship/deploy";
 
 export default function OverviewPage() {
   const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
   const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
   const [apps, setApplications] = useState<Application[]>([]);
+  const [deployments, setDeployments] = useState<Deployment[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -65,12 +42,23 @@ export default function OverviewPage() {
       setNodes(nodes);
       setDockerNodes(await getDocker(nodes));
       setApplications(await getApplications());
+      setDeployments((await getDeployments()).filter((d) => d !== null));
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const appNameByContainer = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const app of apps) {
+      for (const container of app.deployments) {
+        map.set(container, app.name);
+      }
+    }
+    return map;
+  }, [apps]);
 
   return (
     <DashboardLayout title="Overview" subtitle="System status and metrics">
@@ -137,7 +125,7 @@ export default function OverviewPage() {
               ) : (
                 apps.slice(-5).map((app) => (
                   <div
-                    key={app.name}
+                    key={app.id}
                     className="
             grid grid-cols-12 gap-4 py-3 items-center
             text-sm
@@ -176,9 +164,9 @@ export default function OverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentDeployments.map((dep) => (
+              {deployments.slice(-5).map((dep) => (
                 <div
-                  key={dep.id}
+                  key={dep.container}
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-border last:border-0"
                 >
                   <div className="flex items-center gap-3">
@@ -191,14 +179,16 @@ export default function OverviewPage() {
                       )}
                     />
                     <div>
-                      <div className="font-mono text-sm">{dep.app}</div>
+                      <div className="font-mono text-sm">
+                        {appNameByContainer.get(dep.container)}
+                      </div>
                       <div className="text-xs text-muted-foreground">
-                        {dep.version}
+                        {dep.image.slice(7, 19)}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:mt-0">
-                    <Clock className="w-3 h-3" /> {dep.time}
+                    {/* <Clock className="w-3 h-3" /> {dep.time} */}
                   </div>
                 </div>
               ))}

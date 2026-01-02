@@ -1,35 +1,64 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Rocket,
-  RotateCcw,
-  Eye,
-  MoreVertical,
-  Plus,
-  GitBranch,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+import { Rocket, RotateCcw, Eye, MoreVertical, Plus } from "lucide-react";
 import { Application, Deployment } from "@/lib/types";
-import { getDeployments } from "@/core/server/deployment";
-import { getApplications } from "@/core/application";
+import { getDeployments } from "@/lib/dockship/deploy";
+import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
+import DeployAppDialog from "@/components/dialogs/DeployApp";
+
+const statusDot = {
+  running: "bg-chart-2",
+  pending: "bg-chart-1",
+  stopped: "bg-slate-400 dark:bg-slate-600",
+} as const;
 
 export default function DeploymentsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [deployments, setDeployments] = useState<Deployment[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const apps = await getApplications();
-      setApplications(apps);
-      setDeployments((await getDeployments(apps)).filter((d) => d !== null));
+    let mounted = true;
+
+    async function fetchData() {
+      try {
+        const [apps, deps] = await Promise.all([
+          getApplications(),
+          getDeployments(),
+        ]);
+
+        if (!mounted) return;
+
+        setApplications(apps);
+        setDeployments(deps.filter((d) => d !== null));
+      } catch (err) {
+        console.error("Failed to load deployments:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    fetchData();
+    return () => {
+      mounted = false;
     };
-    fetch();
   }, []);
+
+  const appNameByContainer = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const app of applications) {
+      for (const container of app.deployments) {
+        map.set(container, app.name);
+      }
+    }
+    return map;
+  }, [applications]);
 
   return (
     <DashboardLayout
@@ -37,82 +66,94 @@ export default function DeploymentsPage() {
       subtitle="Deployment history and management"
     >
       {/* Header */}
-      <div className="flex flex-row gap-3 items-center justify-between mb-6">
-        <Badge>{deployments.length} deployments</Badge>
+      <div className="flex items-center justify-between mb-6">
+        <Badge>
+          {loading ? "Loading…" : `${deployments.length} deployments`}
+        </Badge>
 
-        <Button size="sm" className="gap-2 self-auto">
-          <Plus className="w-4 h-4" />
-          New Deployment
-        </Button>
+        <DeployAppDialog>
+          <Button size="sm" className="gap-2">
+            <Plus className="w-4 h-4" />
+            New Deployment
+          </Button>
+        </DeployAppDialog>
       </div>
 
-      <div className="hidden md:visible space-y-3">
-        {deployments.map((dep) => (
-          <div
-            key={dep.image}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-border last:border-0"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  "size-2 rounded-full",
-                  (dep.status === "running" && "bg-chart-2") ||
-                    (dep.status === "pending" && "bg-chart-1") ||
-                    "bg-slate-400 dark:bg-slate-600"
-                )}
-              />
-              <div>
-                <div className="font-mono text-sm">
-                  {
-                    applications.find((app) =>
-                      app.deployments.includes(dep.image)
-                    )?.name
-                  }
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {/* {dep.version} */}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:mt-0">
-              {/* <Clock className="w-3 h-3" /> {dep.time} */}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Desktop */}
+      <div className="hidden md:block space-y-3">
+        {deployments.map((dep) => {
+          const appName =
+            appNameByContainer.get(dep.container) ?? "Unknown app";
 
-      {/* Mobile cards */}
-      <div className="md:hidden divide-y divide-border">
-        {deployments.map((dep) => (
-          <div key={dep.image} className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Rocket className="w-4 h-4 text-muted-foreground" />
-                <span className="font-mono text-sm">{dep.image}</span>
-              </div>
-              {dep.status}
-            </div>
-
-            {/* <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">By</span>
-                    <div className="truncate">{dep.deployedBy}</div>
+          return (
+            <div
+              key={`${dep.image}-${dep.container ?? "latest"}`}
+              className="flex items-center justify-between py-2 border-b border-border last:border-0"
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={cn(
+                    "size-2 rounded-full",
+                    statusDot[dep.status as keyof typeof statusDot] ??
+                      statusDot.stopped
+                  )}
+                />
+                <div>
+                  <div className="font-mono text-sm">{appName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {dep.image}
                   </div>
-                </div> */}
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-1 pt-2">
-              <Button variant="ghost" size="icon-sm">
-                <Eye className="w-3 h-3" />
-              </Button>
-              <Button variant="ghost" size="icon-sm">
-                <RotateCcw className="w-3 h-3" />
-              </Button>
-              <Button variant="ghost" size="icon-sm">
-                <MoreVertical className="w-3 h-3" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon-sm">
+                  <Eye className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="icon-sm">
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="icon-sm">
+                  <MoreVertical className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden divide-y divide-border">
+        {deployments.map((dep) => {
+          const appName =
+            appNameByContainer.get(dep.container) ?? "Unknown app";
+
+          return (
+            <div key={`${dep.container}-mobile`} className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Rocket className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-mono text-sm">{appName}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {dep.status}
+                </span>
+              </div>
+
+              <div className="flex justify-end gap-1 pt-2">
+                <Button variant="ghost" size="icon-sm">
+                  <Eye className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="icon-sm">
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="icon-sm">
+                  <MoreVertical className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </DashboardLayout>
   );
