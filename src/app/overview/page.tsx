@@ -121,26 +121,45 @@ export default function OverviewPage() {
             </Link>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <div className="space-y-0 min-w-125">
-              <div className="grid grid-cols-12 gap-4 text-xs text-muted-foreground uppercase tracking-wider py-2 border-b border-border">
-                <div className="col-span-4">Name</div>
-                <div className="col-span-2">Deployments</div>
-                <div className="col-span-2">Node</div>
+            <div className="min-w-lg">
+              {/* Header */}
+              <div className="grid grid-cols-12 gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wider py-2 border-b">
+                <div className="col-span-5">Name</div>
+                <div className="col-span-4">Deployments</div>
+                <div className="col-span-3">Node</div>
               </div>
-              {apps.slice(-5).map((app) => (
-                <div
-                  key={app.name}
-                  className="grid grid-cols-12 gap-4 py-3 items-center data-table-row"
-                >
-                  <div className="col-span-4 font-mono text-sm">{app.name}</div>
-                  <div className="col-span-2 text-sm text-muted-foreground">
-                    {app.deployments.length}
-                  </div>
-                  <div className="col-span-2">
-                    {nodes.find((node) => node.node_id === app.nodeId)?.name}
-                  </div>
+
+              {/* Rows */}
+              {apps.slice(-5).length === 0 ? (
+                <div className="py-6 text-sm text-muted-foreground text-center">
+                  No applications yet
                 </div>
-              ))}
+              ) : (
+                apps.slice(-5).map((app) => (
+                  <div
+                    key={app.name}
+                    className="
+            grid grid-cols-12 gap-4 py-3 items-center
+            text-sm
+            hover:bg-muted/50
+            transition-colors
+            rounded-md
+          "
+                  >
+                    <div className="col-span-5 font-mono truncate">
+                      {app.name}
+                    </div>
+
+                    <div className="col-span-4 text-muted-foreground">
+                      {app.deployments.length}
+                    </div>
+
+                    <div className="col-span-3 truncate">
+                      {nodes.find((n) => n.node_id === app.nodeId)?.name ?? "—"}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
