@@ -1,13 +1,14 @@
 "use server";
 import { read, write } from "@/app/api/file";
 import axios from "axios";
+import { createHash } from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 type Users = Record<string, { roles: string[] }>;
 
 export async function getSession(): Promise<
-  undefined | { user: { id: number }; accessToken: string }
+  undefined | { userId: string; accessToken: string }
 > {
   const c = await cookies();
   const accessToken = c.get("github_access")?.value;
@@ -16,22 +17,32 @@ export async function getSession(): Promise<
     redirect("/");
   }
 
-  // Test the token
-  try {
-    const user = (
-      await axios.get("https://api.github.com/user", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-    ).data;
+  const tokens: Record<string, string> = await read(
+    () => ({}),
+    "data",
+    "sessions.json"
+  );
 
+  const tokenHash = createHash("sha256").update(accessToken).digest("hex");
+
+  try {
+    const userId: string =
+      tokens[tokenHash] ||
+      (
+        await axios.get("https://api.github.com/user", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+      ).data.id;
+
+    // Test the token
     const users = Object.keys(
       await read<Users>(() => ({}), "data", "users.json")
     );
 
-    if (!users.includes(String(user.id))) {
+    if (!users.includes(String(userId))) {
       if (users.length === 0) {
         await write(
-          { [String(user.id)]: { roles: ["admin"] } } as Users, // First user is always an admin
+          { [userId]: { roles: ["admin"] } } as Users, // First user is always an admin
           "data",
           "users.json"
         );
@@ -40,7 +51,9 @@ export async function getSession(): Promise<
       }
     }
 
-    return { user, accessToken };
+    await write({ ...tokens, [tokenHash]: userId }, "data", "sessions.json");
+
+    return { userId, accessToken };
   } catch {
     redirect("/");
   }

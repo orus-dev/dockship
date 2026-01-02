@@ -137,7 +137,7 @@ export default function OverviewPage() {
               ) : (
                 apps.slice(-5).map((app) => (
                   <div
-                    key={app.name}
+                    key={app.id}
                     className="
             grid grid-cols-12 gap-4 py-3 items-center
             text-sm
