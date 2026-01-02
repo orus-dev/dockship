@@ -8,8 +8,6 @@ import {
   FileText,
   Settings,
   Activity,
-  Container,
-  Command,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -25,7 +23,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -34,9 +31,8 @@ import { version } from "../../../package.json";
 const navigation = [
   { name: "Overview", href: "/overview", icon: LayoutGrid },
   { name: "Applications", href: "/applications", icon: Box },
-  { name: "Containers", href: "/containers", icon: Container },
-  { name: "Nodes", href: "/nodes", icon: Server },
   { name: "Deployments", href: "/deployments", icon: Rocket },
+  { name: "Nodes", href: "/nodes", icon: Server },
   { name: "Logs", href: "/logs", icon: FileText },
   { name: "Environment", href: "/environment", icon: Settings },
   { name: "Monitoring", href: "/monitoring", icon: Activity },
