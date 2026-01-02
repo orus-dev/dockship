@@ -20,3 +20,25 @@ export async function getDeployments(): Promise<(null | Deployment)[]> {
     )
   ).flat();
 }
+
+export async function deployApp(
+  name: string,
+  appId: string,
+  nodeId: string
+): Promise<string | undefined> {
+  const nodes = await getNodes();
+
+  const node = nodes.find((n) => n.node_id === nodeId);
+
+  if (!node) throw new Error("Node not found");
+
+  return await (
+    await axios.post(
+      `http://${node.ip}:3000/api/deploy`,
+      { name, appId },
+      {
+        headers: { Authorization: `ApiKey ${node.key}` },
+      }
+    )
+  ).data.deployId;
+}

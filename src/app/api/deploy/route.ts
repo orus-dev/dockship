@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { getDeployments } from "@/core/deployment";
+import { deployApp, getDeployments } from "@/core/deployment";
 import { getApplications } from "@/core/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -26,8 +26,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
-  const { name, repo, nodeId }: { name: string; repo: string; nodeId: string } =
-    await req.json();
+  const { name, appId }: { name: string; appId: string } = await req.json();
 
   if (auth) {
     return NextResponse.json(
@@ -36,17 +35,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if (!name || !repo || !nodeId) {
+  if (!name || !appId) {
     return NextResponse.json(
-      { message: "Body missing name, repo, nodeId" },
+      { message: "Body missing name, appId, nodeId" },
       { status: StatusCodes.BAD_REQUEST }
     );
   }
 
-  const res = await installApp(name, repo, nodeId);
+  const deployId = await deployApp(name, appId);
 
   return NextResponse.json({
     message: "ok",
-    ...res,
+    deployId,
   });
 }

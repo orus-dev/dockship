@@ -17,6 +17,7 @@ import { Application, Deployment } from "@/lib/types";
 import { getDeployments } from "@/lib/dockship/deploy";
 import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
+import DeployAppDialog from "@/components/dialogs/DeployApp";
 
 export default function DeploymentsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -39,10 +40,12 @@ export default function DeploymentsPage() {
       <div className="flex flex-row gap-3 items-center justify-between mb-6">
         <Badge>{deployments.length} deployments</Badge>
 
-        <Button size="sm" className="gap-2 self-auto">
-          <Plus className="w-4 h-4" />
-          New Deployment
-        </Button>
+        <DeployAppDialog>
+          <Button size="sm" className="gap-2 self-auto">
+            <Plus className="w-4 h-4" />
+            New Deployment
+          </Button>
+        </DeployAppDialog>
       </div>
 
       <div className="hidden md:visible space-y-3">
