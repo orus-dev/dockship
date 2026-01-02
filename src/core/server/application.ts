@@ -81,7 +81,7 @@ export async function getEnv(): Promise<Record<string, Env>> {
 
     const envPath = path.join(DATA_DIR, appId, "env.json");
     if (fs.existsSync(envPath)) {
-      const envData: EnvVariable[] = JSON.parse(
+      const envData: Record<string, EnvVariable> = JSON.parse(
         fs.readFileSync(envPath, "utf-8")
       );
       acc[appId] = { variables: envData, id: appId, name };
