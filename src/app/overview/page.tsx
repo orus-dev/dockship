@@ -16,11 +16,11 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { getLiveNodes } from "@/core/node";
+import { getLiveNodes } from "@/lib/dockship/node";
 import { useEffect, useState } from "react";
 import { Application, Docker, Node, NodeLiveData } from "@/lib/types";
-import { getDocker } from "@/core/docker";
-import { getApplications } from "@/core/application";
+import { getDocker } from "@/lib/dockship/docker";
+import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 
 const recentDeployments = [

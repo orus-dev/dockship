@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
 import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
 import { useEffect, useState } from "react";
-import { getApplications, removeApp } from "@/core/application";
+import { getApplications, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
 import { Application } from "@/lib/types";
 

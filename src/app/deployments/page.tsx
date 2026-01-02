@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Application, Deployment } from "@/lib/types";
-import { getDeployments } from "@/core/server/deployment";
-import { getApplications } from "@/core/application";
+import { getDeployments } from "@/core/deployment";
+import { getApplications } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 
 export default function DeploymentsPage() {

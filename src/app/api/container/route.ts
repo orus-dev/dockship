@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { getDocker, removeContainer } from "@/core/server/docker";
+import { getDocker, removeContainer } from "@/core/docker";
 import { Docker } from "@/lib/types";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {

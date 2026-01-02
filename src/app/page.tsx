@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import redirectAuth from "@/core/auth/redirect";
+import redirectAuth from "@/lib/dockship/redirect";
 import { GithubIcon } from "lucide-react";
 import Image from "next/image";
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Eye, EyeOff, Copy, Save, Lock, Loader2 } from "lucide-react";
 import { Env } from "@/lib/types";
-import { getEnv, setEnv } from "@/core/application";
+import { getEnv, setEnv } from "@/lib/dockship/application";
 import { AddVariableDialog } from "@/components/dialogs/AddVariable";
 import {
   DropdownMenu,

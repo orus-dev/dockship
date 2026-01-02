@@ -18,7 +18,7 @@ import {
   authNode,
   getNodes,
   setNodes as updateNodes,
-} from "@/core/node";
+} from "@/lib/dockship/node";
 
 export default function AddNode({ children }: { children: ReactNode }) {
   const [step, setStep] = useState<1 | 2>(1);

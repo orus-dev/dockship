@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pause, Play, Download, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Log } from "@/lib/types";
-import { getAllContainerLogs } from "@/core/docker";
+import { getAllContainerLogs } from "@/lib/dockship/docker";
 
 export default function LogsPage() {
   const [isPaused, setIsPaused] = useState(false);

@@ -1,110 +1,112 @@
 "use server";
 
-import axios from "axios";
-import { Deployment, Docker, Log, Node, SimpleStats } from "@/lib/types";
-import { verifySession } from "./auth/session";
-import { getNodes } from "./node";
+import { CPUusage } from "@/lib/server/calc";
+import { Log, SimpleStats } from "@/lib/types";
+import Docker from "dockerode";
 
-export async function getDocker(nodes: Node[]): Promise<Docker[]> {
-  if (await verifySession()) return [];
+const docker = new Docker();
 
-  return await Promise.all(
-    nodes.map(async (node) => {
-      const data = await (
-        await axios.get(`http://${node.ip}:3000/api/container/`, {
-          headers: { Authorization: `ApiKey ${node.key}` },
-        })
-      ).data;
-
-      return { ...node, containers: data.containers, version: data.version };
-    })
-  );
+export async function getDocker() {
+  const version = await docker.version();
+  const containers = await docker.listContainers({ all: true });
+  return { version, containers };
 }
 
 export async function getContainerStats(
   containerId: string
 ): Promise<SimpleStats | undefined> {
-  const nodes = await getNodes();
+  const container = docker.getContainer(containerId);
 
-  return (
-    await Promise.all(
-      nodes.map(
-        async (n) =>
-          await (
-            await axios.get(`http://${n.ip}:3000/api/container/stats`, {
-              headers: { Authorization: `ApiKey ${n.key}` },
-              params: { containerId },
-            })
-          ).data?.stats
-      )
-    )
-  ).find((s) => s);
+  const data = await container.inspect();
+
+  if (!data.State.Running) {
+    return;
+  }
+
+  const stats = await container.stats({ stream: false });
+
+  return {
+    cpu: CPUusage(stats),
+    memory: (stats.memory_stats.usage / stats.memory_stats.limit) * 100,
+  };
 }
 
 export async function startContainer(containerId: string) {
-  const nodes = await getNodes();
-
-  nodes.forEach(
-    async (n) =>
-      await (
-        await axios.post(
-          `http://${n.ip}:3000/api/container/start`,
-          { containerId },
-          {
-            headers: { Authorization: `ApiKey ${n.key}` },
-            params: { containerId },
-          }
-        )
-      ).data
-  );
+  await docker.getContainer(containerId).start();
 }
 
 export async function stopContainer(containerId: string) {
-  const nodes = await getNodes();
-
-  nodes.forEach(
-    async (n) =>
-      await (
-        await axios.delete(`http://${n.ip}:3000/api/container/start`, {
-          headers: { Authorization: `ApiKey ${n.key}` },
-          params: { containerId },
-        })
-      ).data
-  );
+  await docker.getContainer(containerId).stop();
 }
 
 export async function removeContainer(containerId: string) {
-  const nodes = await getNodes();
+  await docker.getContainer(containerId).remove();
+}
 
-  nodes.forEach(
-    async (n) =>
-      await (
-        await axios.delete(`http://${n.ip}:3000/api/container`, {
-          headers: { Authorization: `ApiKey ${n.key}` },
-          params: { containerId },
-        })
-      ).data
-  );
+function inferLevel(message: string): "info" | "warn" | "error" {
+  const msg = message.toLowerCase();
+
+  if (msg.includes("error") || msg.includes("fatal")) return "error";
+  if (msg.includes("warn")) return "warn";
+
+  return "info";
+}
+
+function demuxLogs(buffer: Buffer): string {
+  let offset = 0;
+  let output = "";
+
+  while (offset < buffer.length) {
+    const streamType = buffer[offset];
+    const length = buffer.readUInt32BE(offset + 4);
+    offset += 8;
+
+    output += buffer.slice(offset, offset + length).toString("utf8");
+    offset += length;
+  }
+
+  return output;
+}
+
+async function getContainerLogs(
+  containerId: string,
+  name: string
+): Promise<Log[]> {
+  const container = docker.getContainer(containerId);
+
+  const raw = await container.logs({
+    stdout: true,
+    stderr: true,
+    timestamps: true,
+  });
+
+  const text = demuxLogs(raw);
+
+  return text
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const firstSpace = line.indexOf(" ");
+      const timestamp = line.slice(0, firstSpace);
+      const message = line.slice(firstSpace + 1);
+
+      return {
+        timestamp,
+        level: inferLevel(message),
+        source: name,
+        message,
+      } satisfies Log;
+    });
 }
 
 export async function getAllContainerLogs(): Promise<Log[]> {
-  const nodes = await getNodes();
+  const containers = await docker.listContainers({ all: true });
 
-  return (
-    await Promise.all(
-      nodes.map(
-        async (n) =>
-          await (
-            await axios.get(`http://${n.ip}:3000/api/logs`, {
-              headers: { Authorization: `ApiKey ${n.key}` },
-            })
-          ).data
-      )
-    )
-  )
+  const logs = await Promise.all(
+    containers.map((c) => getContainerLogs(c.Id, c.Names[0].replace("/", "")))
+  );
+
+  return logs
     .flat()
-    .sort(
-      (a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
 }

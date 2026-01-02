@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getLiveNodes } from "@/core/node";
+import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
 import { Node, NodeLiveData } from "@/lib/types";
-import { installApp } from "@/core/application";
+import { installApp } from "@/lib/dockship/application";
 
 export default function InstallApplicationDialog({
   children,

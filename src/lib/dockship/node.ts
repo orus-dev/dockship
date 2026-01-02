@@ -3,7 +3,7 @@
 import { read, write } from "@/app/api/file";
 import { Node, NodeLiveData } from "@/lib/types";
 import axios from "axios";
-import { verifySession } from "./auth/session";
+import { verifySession } from "../../core/auth/session";
 
 export async function getNodes(): Promise<Node[]> {
   if (await verifySession()) return [];

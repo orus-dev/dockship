@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { getEnv, setEnv } from "@/core/server/application";
+import { getEnv, setEnv } from "@/core/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);

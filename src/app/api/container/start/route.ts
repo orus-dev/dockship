@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../../auth";
 import { StatusCodes } from "http-status-codes";
-import { startContainer, stopContainer } from "@/core/server/docker";
+import { startContainer, stopContainer } from "@/core/docker";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
