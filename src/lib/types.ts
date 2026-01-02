@@ -54,20 +54,16 @@ export interface Application {
   repo: string;
   nodeId: string;
   createdAt: string;
+  deployments: string[];
 }
 
-export interface ImageApp {
-  app?: Application;
-  id: string;
-  name: string;
+export interface Deployment {
   image: string;
-  containers: number;
-  replicas: string;
+  container: string;
   cpu: number;
   memory: number;
-  network: string;
-  status: "running" | "stopped";
-  ports: string[];
+  status: "running" | "stopped" | "pending";
+  ports: [number, number][];
 }
 
 export interface SimpleStats {

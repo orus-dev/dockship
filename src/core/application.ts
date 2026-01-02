@@ -3,7 +3,7 @@
 import { verifySession } from "./auth/session";
 import { getNodes } from "./node";
 import axios from "axios";
-import { Env, EnvVariable, ImageApp } from "@/lib/types";
+import { Env, EnvVariable, Application } from "@/lib/types";
 
 export async function installApp(name: string, repo: string, nodeId: string) {
   if (await verifySession()) {
@@ -25,7 +25,7 @@ export async function installApp(name: string, repo: string, nodeId: string) {
   ).data.applications;
 }
 
-export async function getApplications(): Promise<ImageApp[]> {
+export async function getApplications(): Promise<Application[]> {
   const nodes = await getNodes();
 
   return (

@@ -12,16 +12,16 @@ import {
   Activity,
   ArrowRight,
   Clock,
+  Rocket,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { getLiveNodes } from "@/core/node";
 import { useEffect, useState } from "react";
-import { Docker, Node, NodeLiveData } from "@/lib/types";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { getSession } from "@/core/auth/session";
+import { Application, Docker, Node, NodeLiveData } from "@/lib/types";
 import { getDocker } from "@/core/docker";
+import { getApplications } from "@/core/application";
+import { cn } from "@/lib/utils";
 
 const recentDeployments = [
   {
@@ -54,53 +54,17 @@ const recentDeployments = [
   },
 ];
 
-const applications = [
-  {
-    name: "api-gateway",
-    containers: 3,
-    cpu: 45,
-    memory: 62,
-    status: "running" as const,
-  },
-  {
-    name: "auth-service",
-    containers: 2,
-    cpu: 28,
-    memory: 45,
-    status: "running" as const,
-  },
-  {
-    name: "postgres-db",
-    containers: 1,
-    cpu: 65,
-    memory: 78,
-    status: "running" as const,
-  },
-  {
-    name: "redis-cache",
-    containers: 1,
-    cpu: 12,
-    memory: 34,
-    status: "running" as const,
-  },
-  {
-    name: "worker-queue",
-    containers: 4,
-    cpu: 55,
-    memory: 48,
-    status: "pending" as const,
-  },
-].slice(-5);
-
 export default function OverviewPage() {
   const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
   const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
+  const [apps, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     const fetchNodes = async () => {
       const nodes = await getLiveNodes();
       setNodes(nodes);
       setDockerNodes(await getDocker(nodes));
+      setApplications(await getApplications());
     };
     fetchNodes();
     const interval = setInterval(fetchNodes, 3000);
@@ -114,9 +78,23 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Applications"
-          value="12"
-          subtitle="3 pending"
+          value={apps.length}
+          subtitle={`${
+            apps.filter((app) => app.deployments.length > 0).length
+          } Deployed`}
           icon={<Box className="w-4 h-4" />}
+        />
+        <StatCard
+          title="Deployments"
+          value="0"
+          subtitle="0 running"
+          icon={<Rocket className="w-4 h-4" />}
+        />
+        <StatCard
+          title="Nodes"
+          value={nodes.filter((n) => n.liveData).length}
+          subtitle="online"
+          icon={<Server className="w-4 h-4" />}
         />
         <StatCard
           title="Containers"
@@ -127,18 +105,6 @@ export default function OverviewPage() {
           )}
           subtitle="running"
           icon={<Container className="w-4 h-4" />}
-        />
-        <StatCard
-          title="Nodes"
-          value={nodes.filter((n) => n.liveData).length}
-          subtitle="online"
-          icon={<Server className="w-4 h-4" />}
-        />
-        <StatCard
-          title="Uptime"
-          value="99.9%"
-          trend={{ value: 0.2, isPositive: true }}
-          icon={<Activity className="w-4 h-4" />}
         />
       </div>
 
@@ -155,38 +121,45 @@ export default function OverviewPage() {
             </Link>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <div className="space-y-0 min-w-125">
-              <div className="grid grid-cols-12 gap-4 text-xs text-muted-foreground uppercase tracking-wider py-2 border-b border-border">
-                <div className="col-span-4">Name</div>
-                <div className="col-span-2">Containers</div>
-                <div className="col-span-2">CPU</div>
-                <div className="col-span-2">Memory</div>
-                <div className="col-span-2">Status</div>
+            <div className="min-w-lg">
+              {/* Header */}
+              <div className="grid grid-cols-12 gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wider py-2 border-b">
+                <div className="col-span-5">Name</div>
+                <div className="col-span-4">Deployments</div>
+                <div className="col-span-3">Node</div>
               </div>
-              {applications.map((app) => (
-                <div
-                  key={app.name}
-                  className="grid grid-cols-12 gap-4 py-3 items-center data-table-row"
-                >
-                  <div className="col-span-4 font-mono text-sm">{app.name}</div>
-                  <div className="col-span-2 text-sm text-muted-foreground">
-                    {app.containers}
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Progress value={app.cpu} className="w-full" />
-                    <span className="text-xs text-muted-foreground font-mono w-8">
-                      {app.cpu}%
-                    </span>
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Progress value={app.memory} className="w-full" />
-                    <span className="text-xs text-muted-foreground font-mono w-8">
-                      {app.memory}%
-                    </span>
-                  </div>
-                  <div className="col-span-2">{app.status}</div>
+
+              {/* Rows */}
+              {apps.slice(-5).length === 0 ? (
+                <div className="py-6 text-sm text-muted-foreground text-center">
+                  No applications yet
                 </div>
-              ))}
+              ) : (
+                apps.slice(-5).map((app) => (
+                  <div
+                    key={app.name}
+                    className="
+            grid grid-cols-12 gap-4 py-3 items-center
+            text-sm
+            hover:bg-muted/50
+            transition-colors
+            rounded-md
+          "
+                  >
+                    <div className="col-span-5 font-mono truncate">
+                      {app.name}
+                    </div>
+
+                    <div className="col-span-4 text-muted-foreground">
+                      {app.deployments.length}
+                    </div>
+
+                    <div className="col-span-3 truncate">
+                      {nodes.find((n) => n.node_id === app.nodeId)?.name ?? "—"}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -209,7 +182,14 @@ export default function OverviewPage() {
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-border last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    {dep.status}
+                    <span
+                      className={cn(
+                        "size-2 rounded-full",
+                        (dep.status === "running" && "bg-chart-2") ||
+                          (dep.status === "pending" && "bg-chart-1") ||
+                          "bg-slate-400 dark:bg-slate-600"
+                      )}
+                    />
                     <div>
                       <div className="font-mono text-sm">{dep.app}</div>
                       <div className="text-xs text-muted-foreground">

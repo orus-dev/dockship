@@ -12,238 +12,108 @@ import {
   Plus,
   GitBranch,
 } from "lucide-react";
-
-const deployments = [
-  {
-    id: "dep-001",
-    app: "api-gateway",
-    version: "v2.4.1",
-    previousVersion: "v2.4.0",
-    status: "running" as const,
-    deployedAt: "2024-01-15 14:32:18",
-    deployedBy: "ci/github-actions",
-    duration: "45s",
-    replicas: "3/3",
-    strategy: "rolling",
-  },
-  {
-    id: "dep-002",
-    app: "auth-service",
-    version: "v1.8.0",
-    previousVersion: "v1.7.9",
-    status: "running" as const,
-    deployedAt: "2024-01-15 14:18:42",
-    deployedBy: "admin@dockship.io",
-    duration: "32s",
-    replicas: "2/2",
-    strategy: "rolling",
-  },
-  {
-    id: "dep-003",
-    app: "worker-queue",
-    version: "v3.1.2",
-    previousVersion: "v3.1.1",
-    status: "pending" as const,
-    deployedAt: "2024-01-15 13:58:05",
-    deployedBy: "ci/github-actions",
-    duration: "—",
-    replicas: "3/4",
-    strategy: "rolling",
-  },
-  {
-    id: "dep-004",
-    app: "metrics-collector",
-    version: "v1.2.0",
-    previousVersion: "v1.1.8",
-    status: "error" as const,
-    deployedAt: "2024-01-15 13:42:11",
-    deployedBy: "ci/github-actions",
-    duration: "—",
-    replicas: "0/2",
-    strategy: "rolling",
-  },
-  {
-    id: "dep-005",
-    app: "postgres-db",
-    version: "15-alpine",
-    previousVersion: "14-alpine",
-    status: "running" as const,
-    deployedAt: "2024-01-10 09:15:33",
-    deployedBy: "admin@dockship.io",
-    duration: "2m 18s",
-    replicas: "1/1",
-    strategy: "recreate",
-  },
-  {
-    id: "dep-006",
-    app: "redis-cache",
-    version: "7-alpine",
-    previousVersion: "7-alpine",
-    status: "running" as const,
-    deployedAt: "2024-01-08 16:45:22",
-    deployedBy: "admin@dockship.io",
-    duration: "18s",
-    replicas: "1/1",
-    strategy: "recreate",
-  },
-];
+import { useEffect, useState } from "react";
+import { Application, Deployment } from "@/lib/types";
+import { getDeployments } from "@/core/server/deployment";
+import { getApplications } from "@/core/application";
+import { cn } from "@/lib/utils";
 
 export default function DeploymentsPage() {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [deployments, setDeployments] = useState<Deployment[]>([]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const apps = await getApplications();
+      setApplications(apps);
+      setDeployments((await getDeployments(apps)).filter((d) => d !== null));
+    };
+    fetch();
+  }, []);
+
   return (
     <DashboardLayout
       title="Deployments"
       subtitle="Deployment history and management"
     >
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+      <div className="flex flex-row gap-3 items-center justify-between mb-6">
         <Badge>{deployments.length} deployments</Badge>
 
-        <Button size="sm" className="gap-2 self-start sm:self-auto">
+        <Button size="sm" className="gap-2 self-auto">
           <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Deployment</span>
+          New Deployment
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {/* Desktop table */}
-          <div className="hidden md:block">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  {[
-                    "Application",
-                    "Version",
-                    "Status",
-                    "Replicas",
-                    "Deployed",
-                    "Duration",
-                    "Deployed By",
-                    "Actions",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className={`text-left text-xs text-muted-foreground uppercase tracking-wider py-3 px-4 ${
-                        h === "Actions" ? "text-right" : ""
-                      }`}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {deployments.map((dep) => (
-                  <tr key={dep.id} className="data-table-row">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Rocket className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-mono text-sm">{dep.app}</span>
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <GitBranch className="w-3 h-3 text-muted-foreground" />
-                        <span className="font-mono text-sm">{dep.version}</span>
-                        <span className="text-[10px] text-muted-foreground">
-                          ← {dep.previousVersion}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4">{dep.status}</td>
-
-                    <td className="py-3 px-4 font-mono text-sm">
-                      {dep.replicas}
-                    </td>
-
-                    <td className="py-3 px-4 font-mono text-xs text-muted-foreground">
-                      {dep.deployedAt}
-                    </td>
-
-                    <td className="py-3 px-4 font-mono text-xs">
-                      {dep.duration}
-                    </td>
-
-                    <td className="py-3 px-4 text-xs text-muted-foreground">
-                      {dep.deployedBy}
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
-                          <Eye className="w-3 h-3" />
-                        </Button>
-                        <Button variant="ghost" size="icon-sm">
-                          <RotateCcw className="w-3 h-3" />
-                        </Button>
-                        <Button variant="ghost" size="icon-sm">
-                          <MoreVertical className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="hidden md:visible space-y-3">
+        {deployments.map((dep) => (
+          <div
+            key={dep.image}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-border last:border-0"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className={cn(
+                  "size-2 rounded-full",
+                  (dep.status === "running" && "bg-chart-2") ||
+                    (dep.status === "pending" && "bg-chart-1") ||
+                    "bg-slate-400 dark:bg-slate-600"
+                )}
+              />
+              <div>
+                <div className="font-mono text-sm">
+                  {
+                    applications.find((app) =>
+                      app.deployments.includes(dep.image)
+                    )?.name
+                  }
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {/* {dep.version} */}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1 sm:mt-0">
+              {/* <Clock className="w-3 h-3" /> {dep.time} */}
+            </div>
           </div>
+        ))}
+      </div>
 
-          {/* Mobile cards */}
-          <div className="md:hidden divide-y divide-border">
-            {deployments.map((dep) => (
-              <div key={dep.id} className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Rocket className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-mono text-sm">{dep.app}</span>
-                  </div>
-                  {dep.status}
-                </div>
+      {/* Mobile cards */}
+      <div className="md:hidden divide-y divide-border">
+        {deployments.map((dep) => (
+          <div key={dep.image} className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Rocket className="w-4 h-4 text-muted-foreground" />
+                <span className="font-mono text-sm">{dep.image}</span>
+              </div>
+              {dep.status}
+            </div>
 
-                <div className="flex items-center gap-2 text-xs">
-                  <GitBranch className="w-3 h-3 text-muted-foreground" />
-                  <span className="font-mono">{dep.version}</span>
-                  <span className="text-muted-foreground">
-                    ← {dep.previousVersion}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Replicas</span>
-                    <div className="font-mono">{dep.replicas}</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Duration</span>
-                    <div className="font-mono">{dep.duration}</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Deployed</span>
-                    <div className="font-mono">{dep.deployedAt}</div>
-                  </div>
+            {/* <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">By</span>
                     <div className="truncate">{dep.deployedBy}</div>
                   </div>
-                </div>
+                </div> */}
 
-                <div className="flex justify-end gap-1 pt-2">
-                  <Button variant="ghost" size="icon-sm">
-                    <Eye className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm">
-                    <RotateCcw className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm">
-                    <MoreVertical className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+            <div className="flex justify-end gap-1 pt-2">
+              <Button variant="ghost" size="icon-sm">
+                <Eye className="w-3 h-3" />
+              </Button>
+              <Button variant="ghost" size="icon-sm">
+                <RotateCcw className="w-3 h-3" />
+              </Button>
+              <Button variant="ghost" size="icon-sm">
+                <MoreVertical className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
     </DashboardLayout>
   );
 }
