@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { Docker, Log, Node, SimpleStats } from "@/lib/types";
+import { Deployment, Docker, Log, Node, SimpleStats } from "@/lib/types";
 import { verifySession } from "./auth/session";
 import { getNodes } from "./node";
 

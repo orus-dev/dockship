@@ -1,80 +1,25 @@
 "use server";
 
-import Docker, { Container, ContainerStats } from "dockerode";
+import Docker from "dockerode";
 import { randomUUID } from "crypto";
 import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import util from "util";
-import { Env, EnvVariable, ImageApp } from "@/lib/types";
-import { CPUusage } from "@/lib/server/calc";
+import { Application, Env, EnvVariable } from "@/lib/types";
 
 const docker = new Docker();
 const execAsync = util.promisify(exec);
 const DATA_DIR = path.join(process.cwd(), "data", "apps");
 
-export async function getApplications(): Promise<ImageApp[]> {
-  const images = await docker.listImages();
-  const containers = await docker.listContainers({ all: true });
-
-  const apps: ImageApp[] = [];
-
-  for (const image of images) {
-    const imageName = image.RepoTags?.[0];
-    if (!imageName) continue;
-
-    const relatedContainers = containers.filter((c) => c.Image === imageName);
-
-    let totalCpu = 0;
-    let totalMem = 0;
-    let running = 0;
-    const ports = new Set<string>();
-
-    for (const containerInfo of relatedContainers) {
-      const container = docker.getContainer(containerInfo.Id);
-
-      if (containerInfo.State === "running") running++;
-
-      containerInfo.Ports?.forEach((p) => {
-        if (p.PublicPort && p.PrivatePort) {
-          ports.add(`${p.PublicPort}:${p.PrivatePort}`);
-        }
-      });
-
-      if (containerInfo.State === "running") {
-        const stats = await container.stats({ stream: false });
-
-        totalMem += (stats.memory_stats.usage / stats.memory_stats.limit) * 100;
-        totalCpu += CPUusage(stats);
-      }
-    }
-
-    const name = imageName.split("/").pop()?.split(":")[0] ?? imageName;
-
-    var app;
-
-    try {
-      app = JSON.parse(
-        fs.readFileSync(path.join(DATA_DIR, name, "app.json")).toString()
-      );
-    } catch {}
-
-    apps.push({
-      app,
-      name,
-      id: image.Id.slice(7, 15),
-      image: imageName,
-      containers: relatedContainers.length,
-      replicas: `${running}/${relatedContainers.length}`,
-      cpu: totalCpu,
-      memory: totalMem,
-      network: "—",
-      status: running > 0 ? ("running" as const) : ("stopped" as const),
-      ports: [...ports],
-    });
-  }
-
-  return apps;
+export async function getApplications(): Promise<Application[]> {
+  return fs
+    .readdirSync(DATA_DIR)
+    .map((appId) =>
+      JSON.parse(
+        fs.readFileSync(path.join(DATA_DIR, appId, "app.json")).toString()
+      )
+    );
 }
 
 export async function installApp(name: string, repo: string, nodeId: string) {
@@ -87,12 +32,13 @@ export async function installApp(name: string, repo: string, nodeId: string) {
   fs.mkdirSync(repoDir, { recursive: true });
 
   // Write app.json
-  const appConfig = {
+  const appConfig: Application = {
     id: appId,
     name,
     repo,
     nodeId,
     createdAt: new Date().toISOString(),
+    deployments: [],
   };
 
   fs.writeFileSync(
@@ -100,6 +46,7 @@ export async function installApp(name: string, repo: string, nodeId: string) {
     JSON.stringify(appConfig, null, 2)
   );
 
+  // Write env.json
   fs.writeFileSync(path.join(appDir, "env.json"), JSON.stringify([], null, 2));
 
   // Clone repository
@@ -115,23 +62,13 @@ export async function installApp(name: string, repo: string, nodeId: string) {
   try {
     fs.accessSync(dockerfilePath);
   } catch {
+    fs.rmSync(appDir, { recursive: true });
     throw new Error("Dockerfile not found in repository root");
-  }
-
-  const imageTag = `dockship/${appId}:latest`;
-
-  try {
-    await execAsync(`docker build -t ${imageTag} .`, {
-      cwd: repoDir,
-    });
-  } catch {
-    throw new Error("Docker build failed");
   }
 
   return {
     success: true,
     appId,
-    image: imageTag,
   };
 }
 
