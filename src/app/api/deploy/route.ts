@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
 import { deployApp, getDeployments } from "@/core/deployment";
-import { getApplications } from "@/core/application";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
@@ -14,9 +13,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const apps = await getApplications();
+  // const apps = await getApplications();
 
-  const applications = await getDeployments(apps);
+  const applications = await getDeployments([]);
 
   return NextResponse.json({
     message: "ok",

@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
-import { getApplications } from "@/core/application";
 import { deployApp } from "@/lib/dockship/deploy";
 import { useAsync } from "@/hooks/use-async";
+import { Application } from "@/lib/types";
 
 export default function DeployAppDialog({
   defaultApp,
@@ -27,7 +27,7 @@ export default function DeployAppDialog({
   children: ReactNode;
 }) {
   const { value: nodes } = useAsync([], getLiveNodes);
-  const { value: applications } = useAsync([], getApplications);
+  const { value: applications } = useAsync<Application[]>([], async () => []);
   const [name, setName] = useState("");
   const [app, setApp] = useState(defaultApp || "");
   const [node, setNode] = useState("");
