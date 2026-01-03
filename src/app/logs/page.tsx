@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Log } from "@/lib/types";
 import { getAllContainerLogs } from "@/lib/dockship/docker";
 import { useAsyncInterval } from "@/hooks/use-async";
+import { AnsiText } from "@/components/ansi/Ansi";
 
 export default function LogsPage() {
   const [isPaused, setIsPaused] = useState(false);
@@ -182,9 +183,10 @@ export default function LogsPage() {
                 </span>
 
                 {/* Message */}
-                <span className="text-foreground wrap-break-words">
+                {/* <span className="text-foreground wrap-break-words">
                   {log.message}
-                </span>
+                </span> */}
+                <AnsiText text={log.message} />
               </div>
             ))}
           </div>
