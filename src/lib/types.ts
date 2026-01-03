@@ -52,7 +52,6 @@ export interface Application {
   id: string;
   name: string;
   repo: string;
-  nodeId: string;
   createdAt: string;
   deployments: string[];
   env: Record<string, EnvVariable>;

@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
-import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
+import RegisterAppDialog from "@/components/dialogs/RegisterApp";
 import { getApps, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
@@ -31,17 +31,20 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <DashboardLayout title="Applications" subtitle="Manage dockship applications">
+    <DashboardLayout
+      title="Applications"
+      subtitle="Manage dockship applications"
+    >
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex flex-wrap items-center gap-2">
           <Badge>{apps.length} apps</Badge>
         </div>
-        <InstallApplicationDialog>
+        <RegisterAppDialog>
           <Button size="sm" className="gap-2 w-full sm:w-auto">
-            <Plus className="w-4 h-4" /> Install Application
+            <Plus className="w-4 h-4" /> Register Application
           </Button>
-        </InstallApplicationDialog>
+        </RegisterAppDialog>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {apps.map((app) => (

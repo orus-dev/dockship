@@ -131,12 +131,8 @@ export default function OverviewPage() {
                       {app.name}
                     </div>
 
-                    <div className="col-span-4 text-muted-foreground">
+                    <div className="col-span-7 text-muted-foreground">
                       {app.deployments.length}
-                    </div>
-
-                    <div className="col-span-3 truncate">
-                      {nodes.find((n) => n.node_id === app.nodeId)?.name ?? "—"}
                     </div>
                   </div>
                 ))
