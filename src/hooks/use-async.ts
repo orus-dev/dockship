@@ -44,7 +44,7 @@ export function useAsyncInterval<T>(
   useEffect(() => {
     let isMounted = true;
 
-    const iid = setInterval(() => {
+    const run = () => {
       setLoading(true);
       asyncFunction()
         .then((result) => {
@@ -56,7 +56,11 @@ export function useAsyncInterval<T>(
         .finally(() => {
           if (isMounted) setLoading(false);
         });
-    }, interval);
+    };
+
+    const iid = setInterval(run, interval);
+
+    run();
 
     return () => {
       isMounted = false;

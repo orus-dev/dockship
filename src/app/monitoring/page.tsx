@@ -29,20 +29,13 @@ const networkChartConfig = {
 } satisfies ChartConfig;
 
 export default function MonitoringPage() {
-  const [data, setData] = useState<
-    { time: string; cpu: number; memory: number; in: number; out: number }[]
-  >([]);
   const isMobile = useIsMobile();
-  const [liveData, setLiveData] = useState<{
-    cpuUsage: number;
-    ramUsage: number;
-  }>();
-  const [containerStats, setContainerStats] = useState<
-    (SimpleStats & { name: string })[]
-  >([]);
+
+  // Metrics polling every 30 seconds
+  const { value: metrics } = useAsyncInterval([], getMetrics, 30000, []);
 
   // Live nodes polling every 3 seconds
-  const { value: liveNodes } = useAsyncInterval(
+  const { value: liveData } = useAsyncInterval(
     { cpuUsage: 0, ramUsage: 0 },
     async () => {
       const nodes = await getLiveNodes();
@@ -55,27 +48,9 @@ export default function MonitoringPage() {
     []
   );
 
-  // Update liveData state
-  useEffect(() => {
-    setLiveData(liveNodes);
-  }, [liveNodes]);
-
-  // Metrics polling every 30 seconds
-  const { value: metrics } = useAsyncInterval(
-    [] as typeof data,
-    getMetrics,
-    30000,
-    []
-  );
-
-  // Update data state
-  useEffect(() => {
-    setData(metrics);
-  }, [metrics]);
-
-  // Container stats fetched once
-  const { value: containers } = useAsync(
-    [] as typeof containerStats,
+  // Container stats
+  const { value: containerStats } = useAsync(
+    [],
     async () => {
       const nodes = await getNodes();
       const dockerNodes = await getDocker(nodes);
@@ -94,10 +69,6 @@ export default function MonitoringPage() {
     },
     []
   );
-
-  useEffect(() => {
-    setContainerStats(containers);
-  }, [containers]);
 
   return (
     <DashboardLayout
@@ -169,13 +140,13 @@ export default function MonitoringPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <GradientAreaChart
           title="CPU Usage"
-          data={data}
+          data={metrics}
           config={cpuChartConfig}
           max={100}
         />
         <GradientAreaChart
           title="Memory Usage"
-          data={data}
+          data={metrics}
           config={memoryChartConfig}
           max={100}
         />
@@ -185,7 +156,7 @@ export default function MonitoringPage() {
       <div className="mb-6">
         <GradientAreaChart
           title="Network I/O"
-          data={data}
+          data={metrics}
           config={networkChartConfig}
         />
       </div>
