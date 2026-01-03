@@ -50,16 +50,10 @@
 - [Docker](https://www.docker.com)
 - [Node.js](https://nodejs.org/en/download/)
 
-Run this on bash
+**Being in the home directory is recommended**
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/orus-dev/dockship/refs/heads/master/installer.sh | bash
-```
-
-Or with curl
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/orus-dev/dockship/refs/heads/master/installer.sh | bash
+git clone https://github.com/orus-dev/dockship.git && cd dockship && bash installer.sh
 ```
 
 ## License

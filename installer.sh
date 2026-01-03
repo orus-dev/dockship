@@ -70,9 +70,12 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=$(pwd)
-ExecStart=$(which npm) run start
+# Use Node directly to run Next.js standalone server
+ExecStart=$(which node) .next/standalone/server.js
 Restart=always
+RestartSec=5
 EnvironmentFile=$(pwd)/.env
+Environment=PATH=$(dirname $(which node)):/usr/bin:/bin
 User=$(whoami)
 Group=$(whoami)
 
