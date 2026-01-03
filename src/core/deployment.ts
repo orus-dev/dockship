@@ -138,6 +138,9 @@ export async function deployApp(
           "3000/tcp": [{ HostPort: "3800" }],
         },
       },
+      Env: Object.entries(app.env).map(
+        ([key, { value }]) => `${key}="${value.replaceAll('"', '\\"')}"`
+      ),
     });
 
     await container.start();
