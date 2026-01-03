@@ -23,10 +23,10 @@ export async function installApp(name: string, repo: string, nodeId: string) {
         headers: { Authorization: `ApiKey ${targetNode?.key}` },
       }
     )
-  ).data.applications;
+  ).data.apps;
 }
 
-export async function getApplications(): Promise<Application[]> {
+export async function getApps(): Promise<Application[]> {
   if (await verifySession()) {
     throw new Error("Unauthorized");
   }
@@ -35,7 +35,7 @@ export async function getApplications(): Promise<Application[]> {
 }
 
 export async function getEnv(): Promise<Record<string, Env>> {
-  const apps = await getApplications();
+  const apps = await getApps();
 
   return apps.reduce<Record<string, Env>>((acc, app) => {
     acc[app.id] = {
@@ -56,14 +56,14 @@ export async function setEnv(
     throw new Error("Unauthorized");
   }
 
-  const apps = await getApplications();
+  const apps = await getApps();
   const app = apps.find((app) => app.id === appId);
   if (!app) throw new Error("App not found");
   editApp(appId, { ...app, env: variables });
 }
 
 export async function removeApp(appId: string) {
-  const apps = await getApplications();
+  const apps = await getApps();
 
   const nextApps = apps.filter((app) => app.id !== appId);
 
@@ -71,7 +71,7 @@ export async function removeApp(appId: string) {
 }
 
 export async function editApp(appId: string, updatedApp: Application) {
-  const apps = await getApplications();
+  const apps = await getApps();
 
   const nextApps = apps.map((app) => (app.id === appId ? updatedApp : app));
 

@@ -13,13 +13,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // const apps = await getApplications();
+  // const apps = await getApps();
 
-  const applications = await getDeployments([]);
+  const apps = await getDeployments([]);
 
   return NextResponse.json({
     message: "ok",
-    applications,
+    apps,
   });
 }
 

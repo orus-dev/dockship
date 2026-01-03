@@ -13,32 +13,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
 import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
-import { getApplications, removeApp } from "@/lib/dockship/application";
+import { getApps, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
 import { useAsyncInterval } from "@/hooks/use-async";
 
 export default function ApplicationsPage() {
-  const { value: applications, setValue: setApplications } = useAsyncInterval(
+  const { value: apps, setValue: setApps } = useAsyncInterval(
     [],
-    getApplications,
+    getApps,
     3000
   );
 
   const remove = async (appId: string) => {
     await removeApp(appId);
-    setApplications((prev) => prev.filter((app) => app.id !== appId));
+    setApps((prev) => prev.filter((app) => app.id !== appId));
   };
 
   return (
-    <DashboardLayout
-      title="Applications"
-      subtitle="Manage installed applications"
-    >
+    <DashboardLayout title="Applications" subtitle="Manage dockship applications">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge>{applications.length} apps</Badge>
+          <Badge>{apps.length} apps</Badge>
         </div>
         <InstallApplicationDialog>
           <Button size="sm" className="gap-2 w-full sm:w-auto">
@@ -47,7 +44,7 @@ export default function ApplicationsPage() {
         </InstallApplicationDialog>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {applications.map((app) => (
+        {apps.map((app) => (
           <Card key={app.id}>
             <CardHeader>
               <CardTitle>{app.name}</CardTitle>

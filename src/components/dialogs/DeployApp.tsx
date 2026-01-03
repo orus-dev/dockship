@@ -27,7 +27,7 @@ export default function DeployAppDialog({
   children: ReactNode;
 }) {
   const { value: nodes } = useAsync([], getLiveNodes);
-  const { value: applications } = useAsync<Application[]>([], async () => []);
+  const { value: apps } = useAsync<Application[]>([], async () => []);
   const [name, setName] = useState("");
   const [app, setApp] = useState(defaultApp || "");
   const [node, setNode] = useState("");
@@ -66,7 +66,7 @@ export default function DeployAppDialog({
             <Combobox
               value={app}
               setValue={setApp}
-              data={applications.map((app) => ({
+              data={apps.map((app) => ({
                 label: app.name,
                 value: app.id,
               }))}

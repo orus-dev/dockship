@@ -26,7 +26,7 @@ import {
   NodeLiveData,
 } from "@/lib/types";
 import { getDocker } from "@/lib/dockship/docker";
-import { getApplications } from "@/lib/dockship/application";
+import { getApps } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 import { getDeployments } from "@/lib/dockship/deploy";
 import { useAsync, useAsyncInterval } from "@/hooks/use-async";
@@ -36,7 +36,7 @@ export default function OverviewPage() {
   const { value: dockerNodes } = useAsync([], async () => getDocker(nodes), [
     nodes,
   ]);
-  const { value: applications } = useAsyncInterval([], getApplications, 3000);
+  const { value: apps } = useAsyncInterval([], getApps, 3000);
   const { value: deployments } = useAsyncInterval(
     [],
     async () => (await getDeployments()).filter((d) => d !== null),
@@ -45,13 +45,13 @@ export default function OverviewPage() {
 
   const appNameByContainer = useMemo(() => {
     const map = new Map<string, string>();
-    for (const app of applications) {
+    for (const app of apps) {
       for (const container of app.deployments) {
         map.set(container, app.name);
       }
     }
     return map;
-  }, [applications]);
+  }, [apps]);
 
   return (
     <DashboardLayout title="Overview" subtitle="System status and metrics">
@@ -59,9 +59,9 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Applications"
-          value={applications.length}
+          value={apps.length}
           subtitle={`${
-            applications.filter((app) => app.deployments.length > 0).length
+            apps.filter((app) => app.deployments.length > 0).length
           } Deployed`}
           icon={<Box className="w-4 h-4" />}
         />
@@ -111,12 +111,12 @@ export default function OverviewPage() {
               </div>
 
               {/* Rows */}
-              {applications.slice(-5).length === 0 ? (
+              {apps.slice(-5).length === 0 ? (
                 <div className="py-6 text-sm text-muted-foreground text-center">
                   No applications yet
                 </div>
               ) : (
-                applications.slice(-5).map((app) => (
+                apps.slice(-5).map((app) => (
                   <div
                     key={app.id}
                     className="

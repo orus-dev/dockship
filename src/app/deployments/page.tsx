@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Rocket, RotateCcw, Eye, MoreVertical, Plus } from "lucide-react";
 import { Application, Deployment } from "@/lib/types";
 import { getDeployments } from "@/lib/dockship/deploy";
-import { getApplications } from "@/lib/dockship/application";
+import { getApps } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
 import { useAsync } from "@/hooks/use-async";
@@ -20,23 +20,23 @@ const statusDot = {
 } as const;
 
 export default function DeploymentsPage() {
-  const { value: applications } = useAsync([], getApplications);
+  const { value: apps } = useAsync([], getApps);
 
   const { value: deployments, loading } = useAsync(
     [],
     async () => (await getDeployments()).filter((d) => d !== null),
-    [applications]
+    [apps]
   );
 
   const appNameByContainer = useMemo(() => {
     const map = new Map<string, string>();
-    for (const app of applications) {
+    for (const app of apps) {
       for (const container of app.deployments) {
         map.set(container, app.name);
       }
     }
     return map;
-  }, [applications]);
+  }, [apps]);
 
   return (
     <DashboardLayout
