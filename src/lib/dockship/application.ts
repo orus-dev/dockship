@@ -13,6 +13,16 @@ export async function getApps(): Promise<Application[]> {
   return read(() => [], "data", "apps.json");
 }
 
+export async function getApp(appId: string): Promise<Application | undefined> {
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
+
+  return (await read<Application[]>(() => [], "data", "apps.json")).find(
+    (app) => app.id === appId
+  );
+}
+
 export async function registerApp(name: string, repo: string) {
   if (await verifySession()) {
     throw new Error("Unauthorized");

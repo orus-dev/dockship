@@ -20,7 +20,6 @@ function sanitizeString(str: string): string {
 export async function getDeployments(
   apps: Application[]
 ): Promise<Deployment[]> {
-  // Limit concurrent Docker calls (adjust if needed)
   const limit = pLimit(5);
 
   const deploymentIds = apps.flatMap((app) => app.deployments);
