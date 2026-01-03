@@ -17,7 +17,7 @@ export async function getDeployments(): Promise<Deployment[]> {
             await axios.post(`http://${n.ip}:3000/api/get-deployments`, apps, {
               headers: { Authorization: `ApiKey ${n.key}` },
             })
-          ).data.apps
+          ).data.deployments
       )
     )
   ).flat();

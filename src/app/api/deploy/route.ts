@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { deployApp, getDeployments } from "@/core/deployment";
+import { deployApp } from "@/core/deployment";
 import { Application } from "@/lib/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
