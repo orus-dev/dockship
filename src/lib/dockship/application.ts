@@ -4,6 +4,7 @@ import { verifySession } from "../../core/auth/session";
 import { getNodes } from "@/lib/dockship/node";
 import axios from "axios";
 import { Env, EnvVariable, Application } from "@/lib/types";
+import { read, write } from "@/app/api/file";
 
 export async function installApp(name: string, repo: string, nodeId: string) {
   if (await verifySession()) {
@@ -26,63 +27,53 @@ export async function installApp(name: string, repo: string, nodeId: string) {
 }
 
 export async function getApplications(): Promise<Application[]> {
-  const nodes = await getNodes();
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
 
-  return (
-    await Promise.all(
-      nodes.map(
-        async (n) =>
-          await (
-            await axios.get(`http://${n.ip}:3000/api/applications`, {
-              headers: { Authorization: `ApiKey ${n.key}` },
-            })
-          ).data.applications
-      )
-    )
-  ).flat();
+  return read(() => [], "data", "apps.json");
 }
 
 export async function getEnv(): Promise<Record<string, Env>> {
-  const nodes = await getNodes();
+  const apps = await getApplications();
 
-  const envRecords = await Promise.all(
-    nodes.map(async (n) => {
-      const response = await axios.get(`http://${n.ip}:3000/api/env`, {
-        headers: { Authorization: `ApiKey ${n.key}` },
-      });
-      return response.data as Record<string, Env>;
-    })
-  );
+  return apps.reduce<Record<string, Env>>((acc, app) => {
+    acc[app.id] = {
+      id: app.id,
+      name: app.name,
+      variables: app.env,
+    };
 
-  const merged: Record<string, Env> = Object.assign({}, ...envRecords);
-
-  return merged;
+    return acc;
+  }, {});
 }
 
 export async function setEnv(
   appId: string,
   variables: Record<string, EnvVariable>
 ) {
-  const nodes = await getNodes();
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
 
-  nodes.forEach(async (n) => {
-    await axios.post(
-      `http://${n.ip}:3000/api/env`,
-      { appId, variables },
-      {
-        headers: { Authorization: `ApiKey ${n.key}` },
-      }
-    );
-  });
+  const apps = await getApplications();
+  const app = apps.find((app) => app.id === appId);
+  if (!app) throw new Error("App not found");
+  editApp(appId, { ...app, env: variables });
 }
 
 export async function removeApp(appId: string) {
-  const nodes = await getNodes();
+  const apps = await getApplications();
 
-  nodes.forEach(async (n) => {
-    await axios.delete(`http://${n.ip}:3000/api/applications`, {
-      params: { appId },
-      headers: { Authorization: `ApiKey ${n.key}` },
-    });
-  });
+  const nextApps = apps.filter((app) => app.id !== appId);
+
+  await write(nextApps, "data", "apps.json");
+}
+
+export async function editApp(appId: string, updatedApp: Application) {
+  const apps = await getApplications();
+
+  const nextApps = apps.map((app) => (app.id === appId ? updatedApp : app));
+
+  await write(nextApps, "data", "apps.json");
 }

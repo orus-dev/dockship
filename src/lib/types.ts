@@ -55,6 +55,7 @@ export interface Application {
   nodeId: string;
   createdAt: string;
   deployments: string[];
+  env: Record<string, EnvVariable>;
 }
 
 export interface Deployment {
