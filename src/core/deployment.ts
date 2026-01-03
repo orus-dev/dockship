@@ -1,7 +1,7 @@
 "use server";
 
 import Docker from "dockerode";
-import { Application, Deployment } from "@/lib/types";
+import { Application, Deployment, Port } from "@/lib/types";
 import { CPUusage } from "@/lib/server/calc";
 import path from "path";
 import fs from "fs";
@@ -18,6 +18,20 @@ function sanitizeString(str: string): string {
     str[0].replace(/[^a-zA-Z0-9]/g, "-") +
     str.slice(1).replace(/[^a-zA-Z0-9_.-]/g, "-")
   );
+}
+
+function formatPorts(ports: Port[]) {
+  const dockerPorts: Record<string, { HostPort: string }[]> = {};
+
+  ports.forEach(({ containerPort, hostPort, protocol }) => {
+    const key = `${containerPort}/${protocol}`;
+    if (!dockerPorts[key]) {
+      dockerPorts[key] = [];
+    }
+    dockerPorts[key].push({ HostPort: hostPort });
+  });
+
+  return dockerPorts;
 }
 
 export async function getDeployments(
@@ -96,7 +110,8 @@ export async function getDeployments(
 
 export async function deployApp(
   name: string,
-  app: Application
+  app: Application,
+  ports: Port[]
 ): Promise<string | undefined> {
   const deployId = randomUUID();
   const deployPath = path.join("data", "deploys", deployId);
@@ -134,9 +149,7 @@ export async function deployApp(
       Tty: true,
       HostConfig: {
         RestartPolicy: { Name: "unless-stopped" },
-        PortBindings: {
-          "3000/tcp": [{ HostPort: "3800" }],
-        },
+        PortBindings: formatPorts(ports),
       },
       Env: Object.entries(app.env).map(
         ([key, { value }]) => `${key}="${value.replaceAll('"', '\\"')}"`

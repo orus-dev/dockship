@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
 import { deployApp } from "@/core/deployment";
-import { Application } from "@/lib/types";
+import { Application, Port } from "@/lib/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
-  const { name, app }: { name: string; app: Application } = await req.json();
+  const {
+    name,
+    app,
+    ports,
+  }: { name: string; app: Application; ports: Port[] } = await req.json();
 
   if (auth) {
     return NextResponse.json(
@@ -22,7 +26,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const deployId = await deployApp(name, app);
+  const deployId = await deployApp(name, app, ports);
 
   return NextResponse.json({
     message: "ok",

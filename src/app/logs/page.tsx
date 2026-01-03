@@ -20,7 +20,7 @@ export default function LogsPage() {
   const { value: logs, setValue: setLogs } = useAsyncInterval(
     [],
     async () => (isPaused ? ([] as Log[]) : getAllContainerLogs()),
-    100
+    1000
   );
 
   const filteredLogs = logs.filter((log) =>

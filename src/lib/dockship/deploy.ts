@@ -1,6 +1,6 @@
 "use server";
 
-import { Deployment } from "@/lib/types";
+import { Deployment, Port } from "@/lib/types";
 import { getNodes } from "./node";
 import axios from "axios";
 import { editApp, getApp, getApps } from "./application";
@@ -26,7 +26,8 @@ export async function getDeployments(): Promise<Deployment[]> {
 export async function deployApp(
   name: string,
   appId: string,
-  nodeId: string
+  nodeId: string,
+  ports: Port[]
 ): Promise<string | undefined> {
   const nodes = await getNodes();
 
@@ -40,7 +41,7 @@ export async function deployApp(
   const deployId = await (
     await axios.post(
       `http://${node.ip}:3000/api/deploy`,
-      { name, app },
+      { name, app, ports },
       {
         headers: { Authorization: `ApiKey ${node.key}` },
       }

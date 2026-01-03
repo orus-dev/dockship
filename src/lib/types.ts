@@ -88,3 +88,9 @@ export interface Env {
   name: string;
   variables: Record<string, EnvVariable>;
 }
+
+export interface Port {
+  containerPort: string;
+  hostPort: string;
+  protocol: "tcp" | "udp";
+}
