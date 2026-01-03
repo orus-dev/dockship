@@ -6,6 +6,9 @@ import { CPUusage } from "@/lib/server/calc";
 import path from "path";
 import fs from "fs";
 import pLimit from "p-limit";
+import { randomUUID } from "crypto";
+import simpleGit from "simple-git";
+import { cloneRepo } from "./git";
 
 const docker = new Docker();
 
@@ -93,23 +96,27 @@ export async function getDeployments(
 
 export async function deployApp(
   name: string,
-  appId: string
+  app: Application
 ): Promise<string | undefined> {
-  const appPath = path.join("data", "apps", appId, "repo");
-  const imageTag = `dockship/${appId}:latest`;
+  const deployId = randomUUID();
+  const deployPath = path.join("data", "deploys", deployId);
+  const imageTag = `dockship/${deployId}:latest`;
+
+  // Clone the repo
+  await cloneRepo(app.repo, deployPath);
 
   try {
     // Check if app exists
-    fs.accessSync(appPath);
+    fs.accessSync(deployPath);
   } catch {
-    console.error("Repo does not exist:", appPath);
+    console.error("Repo does not exist:", deployPath);
     return undefined;
   }
 
   try {
     const stream = await docker.buildImage(
       {
-        context: appPath,
+        context: deployPath,
         src: ["Dockerfile", "."],
       },
       { t: imageTag }
@@ -139,5 +146,7 @@ export async function deployApp(
   } catch (err) {
     console.error("Failed to deploy app:", err);
     return undefined;
+  } finally {
+    fs.rmSync(deployPath, { recursive: true, force: true });
   }
 }

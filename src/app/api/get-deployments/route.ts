@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { deployApp, getDeployments } from "@/core/deployment";
+import { getDeployments } from "@/core/deployment";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);

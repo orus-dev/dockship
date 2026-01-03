@@ -5,7 +5,7 @@ import { getNodes } from "./node";
 import axios from "axios";
 import { editApp, getApp, getApps } from "./application";
 
-export async function getDeployments(): Promise<(null | Deployment)[]> {
+export async function getDeployments(): Promise<Deployment[]> {
   const nodes = await getNodes();
   const apps = await getApps();
 
@@ -34,18 +34,18 @@ export async function deployApp(
 
   if (!node) throw new Error("Node not found");
 
+  const app = await getApp(appId);
+  if (!app) throw new Error("App not found");
+
   const deployId = await (
     await axios.post(
       `http://${node.ip}:3000/api/deploy`,
-      { name, appId },
+      { name, app },
       {
         headers: { Authorization: `ApiKey ${node.key}` },
       }
     )
   ).data.deployId;
-
-  const app = await getApp(appId);
-  if (!app) throw new Error("(deployId) App not found");
 
   app.deployments.push(deployId);
 

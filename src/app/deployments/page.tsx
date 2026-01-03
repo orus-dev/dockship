@@ -22,11 +22,7 @@ const statusDot = {
 export default function DeploymentsPage() {
   const { value: apps } = useAsync([], getApps);
 
-  const { value: deployments, loading } = useAsync(
-    [],
-    async () => (await getDeployments()).filter((d) => d !== null),
-    [apps]
-  );
+  const { value: deployments, loading } = useAsync([], getDeployments, [apps]);
 
   const appNameByContainer = useMemo(() => {
     const map = new Map<string, string>();
@@ -46,7 +42,9 @@ export default function DeploymentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Badge>
-          {loading ? "Loading…" : `${deployments.length} deployments`}
+          {loading
+            ? "Loading…"
+            : `${deployments.length} deployment${deployments.length > 0 && 's'}`}
         </Badge>
 
         <DeployAppDialog>
