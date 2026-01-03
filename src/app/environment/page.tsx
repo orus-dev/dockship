@@ -24,7 +24,8 @@ export default function EnvironmentPage() {
   const { value: envGroups, setValue: setEnvGroups } = useAsync({}, getEnv);
   const { value: selectedApp, setValue: setSelectedApp } = useAsync(
     "",
-    async () => Object.keys(envGroups)[0] || ""
+    async () => Object.keys(envGroups)[0] || "",
+    [envGroups]
   );
 
   const handleSave = async () => {
