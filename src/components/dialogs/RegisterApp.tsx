@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode, useEffect } from "react";
+import { useState, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,28 +15,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
-import { Node, NodeLiveData } from "@/lib/types";
-import { installApp } from "@/lib/dockship/application";
+import { registerApp } from "@/lib/dockship/application";
+import { useAsync } from "@/hooks/use-async";
 
-export default function InstallApplicationDialog({
+export default function RegisterAppDialog({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [nodeList, setNodeList] = useState<(NodeLiveData & Node)[]>([]);
   const [name, setName] = useState("");
   const [repo, setRepo] = useState("");
-  const [node, setNode] = useState("");
-
-  useEffect(() => {
-    const fetchNodes = async () => {
-      setNodeList(await getLiveNodes());
-    };
-    fetchNodes();
-  }, []);
 
   const deploy = async () => {
-    console.log(await installApp(name, repo, node));
+    console.log(await registerApp(name, repo));
   };
 
   return (
@@ -45,7 +36,7 @@ export default function InstallApplicationDialog({
 
       <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>Install Application</DialogTitle>
+          <DialogTitle>Register Application</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4">
@@ -70,21 +61,6 @@ export default function InstallApplicationDialog({
               value={repo}
               onChange={(e) => setRepo(e.target.value)}
               placeholder="https://github.com/me/myrepo.git"
-            />
-          </div>
-
-          <div className="grid gap-3">
-            <Label htmlFor="node">
-              Node <span className="text-destructive">*</span>
-            </Label>
-            <Combobox
-              value={node}
-              setValue={setNode}
-              data={nodeList
-                .filter((node) => node.liveData)
-                .map((node) => ({ label: node.name, value: node.node_id }))}
-              placeholder="Select Node..."
-              listPlaceholder="No nodes found :("
             />
           </div>
         </div>

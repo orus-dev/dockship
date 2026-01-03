@@ -43,13 +43,13 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-50 justify-between"
+          className="justify-between"
         >
           {value ? data.find((itm) => itm.value === value)?.label : placeholder}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-50 p-0">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Search framework..." className="h-9" />
           <CommandList>

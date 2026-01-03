@@ -1,21 +1,23 @@
 "use server";
 
-import { Deployment } from "@/lib/types";
+import { Deployment, Port } from "@/lib/types";
 import { getNodes } from "./node";
 import axios from "axios";
+import { editApp, getApp, getApps } from "./application";
 
-export async function getDeployments(): Promise<(null | Deployment)[]> {
+export async function getDeployments(): Promise<Deployment[]> {
   const nodes = await getNodes();
+  const apps = await getApps();
 
   return (
     await Promise.all(
       nodes.map(
         async (n) =>
           await (
-            await axios.get(`http://${n.ip}:3000/api/deploy`, {
+            await axios.post(`http://${n.ip}:3000/api/get-deployments`, apps, {
               headers: { Authorization: `ApiKey ${n.key}` },
             })
-          ).data.applications
+          ).data.deployments
       )
     )
   ).flat();
@@ -24,7 +26,8 @@ export async function getDeployments(): Promise<(null | Deployment)[]> {
 export async function deployApp(
   name: string,
   appId: string,
-  nodeId: string
+  nodeId: string,
+  ports: Port[]
 ): Promise<string | undefined> {
   const nodes = await getNodes();
 
@@ -32,13 +35,22 @@ export async function deployApp(
 
   if (!node) throw new Error("Node not found");
 
-  return await (
+  const app = await getApp(appId);
+  if (!app) throw new Error("App not found");
+
+  const deployId = await (
     await axios.post(
       `http://${node.ip}:3000/api/deploy`,
-      { name, appId },
+      { name, app, ports },
       {
         headers: { Authorization: `ApiKey ${node.key}` },
       }
     )
   ).data.deployId;
+
+  app.deployments.push(deployId);
+
+  editApp(appId, app);
+
+  return deployId;
 }

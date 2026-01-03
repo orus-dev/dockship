@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
 import { getMetrics } from "@/lib/dockship/metrics";
-import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
 import { getLiveNodes, getNodes } from "@/lib/dockship/node";
 import { average } from "@/lib/format";
 import { getContainerStats, getDocker } from "@/lib/dockship/docker";
 import { SimpleStats } from "@/lib/types";
+import { useAsync, useAsyncInterval } from "@/hooks/use-async";
 
 const cpuChartConfig = {
   cpu: { label: "CPU Usage", color: "var(--chart-1)" },
@@ -28,74 +28,52 @@ const networkChartConfig = {
 } satisfies ChartConfig;
 
 export default function MonitoringPage() {
-  const [data, setData] = useState<
-    {
-      time: string;
-      cpu: number;
-      memory: number;
-      in: number;
-      out: number;
-    }[]
-  >([]);
   const isMobile = useIsMobile();
-  const [liveData, setLiveData] = useState<{
-    cpuUsage: number;
-    ramUsage: number;
-  }>();
-  const [containerStats, SetContainerStats] = useState<
-    (SimpleStats & { name: string })[]
-  >([]);
 
-  useEffect(() => {
-    const fetchNodes = async () => {
+  // Metrics polling every 30 seconds
+  const { value: metrics } = useAsyncInterval([], getMetrics, 30000, []);
+
+  // Live nodes polling every 3 seconds
+  const { value: liveData } = useAsyncInterval(
+    { cpuUsage: 0, ramUsage: 0 },
+    async () => {
       const nodes = await getLiveNodes();
-      setLiveData({
+      return {
         cpuUsage: average(nodes, (n) => n.liveData?.cpu.usage || 0),
         ramUsage: average(nodes, (n) => n.liveData?.memory.usage || 0),
-      });
-    };
-    fetchNodes();
-    const interval = setInterval(fetchNodes, 3000);
-    return () => clearInterval(interval);
-  }, []);
+      };
+    },
+    3000,
+    []
+  );
 
-  useEffect(() => {
-    async function fetchMetrics() {
-      setData(await getMetrics());
-    }
-
-    fetchMetrics();
-
-    const i = setInterval(fetchMetrics, 30000);
-
-    return () => clearInterval(i);
-  }, []);
-
-  useEffect(() => {
-    async function fetchContainerMetrics() {
+  // Container stats
+  const { value: containerStats } = useAsync(
+    [],
+    async () => {
       const nodes = await getNodes();
       const dockerNodes = await getDocker(nodes);
 
-      SetContainerStats(
-        (
-          await Promise.all(
-            dockerNodes.flatMap((node) =>
-              node.containers.map(async (c) => {
-                const stats = await getContainerStats(c.Id);
-
-                if (stats === undefined) return undefined;
-
-                return { ...stats, name: c.Names[0] };
-              })
-            )
+      return (
+        await Promise.all(
+          dockerNodes.flatMap((node) =>
+            node.containers.map(async (c) => {
+              const stats = await getContainerStats(c.Id);
+              if (!stats) return undefined;
+              return { ...stats, name: c.Names[0] };
+            })
           )
-        ).filter((s): s is SimpleStats & { name: string } => s !== undefined)
-      );
+        )
+      ).filter((s): s is SimpleStats & { name: string } => s !== undefined);
+    },
+    []
+  );
 
-      console.log(containerStats);
-    }
-    fetchContainerMetrics();
-  }, []);
+  const containerCPU = containerStats.reduce((acc, val) => acc + val.cpu, 0);
+  const containerMemory = containerStats.reduce(
+    (acc, val) => acc + val.memory,
+    0
+  );
 
   return (
     <DashboardLayout
@@ -104,15 +82,25 @@ export default function MonitoringPage() {
     >
       {/* Summary Stats */}
       {isMobile ? (
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardContent className="px-4">
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
               <RadialChart value={liveData?.cpuUsage || 0}>CPU</RadialChart>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="px-4">
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
               <RadialChart value={liveData?.ramUsage || 0}>RAM</RadialChart>
+            </CardContent>
+          </Card>
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
+              <RadialChart value={containerCPU}>con CPU</RadialChart>
+            </CardContent>
+          </Card>
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
+              <RadialChart value={containerMemory}>con RAM</RadialChart>
             </CardContent>
           </Card>
         </div>
@@ -124,7 +112,7 @@ export default function MonitoringPage() {
                 CPU usage
               </div>
               <div className="stat-value">
-                {liveData?.cpuUsage?.toFixed(0) || 0}%
+                {liveData?.cpuUsage?.toFixed(1) || 0}%
               </div>
               <Progress value={liveData?.cpuUsage} className="w-full" />
             </CardContent>
@@ -135,7 +123,7 @@ export default function MonitoringPage() {
                 Memory usage
               </div>
               <div className="stat-value">
-                {liveData?.ramUsage?.toFixed(0) || 0}%
+                {liveData?.ramUsage?.toFixed(1) || 0}%
               </div>
               <Progress value={liveData?.ramUsage} className="w-full" />
             </CardContent>
@@ -143,21 +131,19 @@ export default function MonitoringPage() {
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Network In
+                Container CPU usage
               </div>
-              <div className="stat-value">38 MB/s</div>
-              <div className="text-xs text-success mt-1">↑ 12% from avg</div>
+              <div className="stat-value">{containerCPU.toFixed(1)}%</div>
+              <Progress value={containerCPU} className="w-full" />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Network Out
+                Container memory usage
               </div>
-              <div className="stat-value">28 MB/s</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                ↓ 5% from avg
-              </div>
+              <div className="stat-value">{containerMemory.toFixed(1)}%</div>
+              <Progress value={containerMemory} className="w-full" />
             </CardContent>
           </Card>
         </div>
@@ -167,13 +153,13 @@ export default function MonitoringPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <GradientAreaChart
           title="CPU Usage"
-          data={data}
+          data={metrics}
           config={cpuChartConfig}
           max={100}
         />
         <GradientAreaChart
           title="Memory Usage"
-          data={data}
+          data={metrics}
           config={memoryChartConfig}
           max={100}
         />
@@ -183,7 +169,7 @@ export default function MonitoringPage() {
       <div className="mb-6">
         <GradientAreaChart
           title="Network I/O"
-          data={data}
+          data={metrics}
           config={networkChartConfig}
         />
       </div>

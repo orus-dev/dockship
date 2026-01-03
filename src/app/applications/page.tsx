@@ -12,51 +12,42 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
-import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
-import { useEffect, useState } from "react";
-import { getApplications, removeApp } from "@/lib/dockship/application";
+import RegisterAppDialog from "@/components/dialogs/RegisterApp";
+import { getApps, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
-import { Application } from "@/lib/types";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
+import { useAsyncInterval } from "@/hooks/use-async";
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const apps = await getApplications();
-      setApplications(apps);
-    };
-
-    fetch();
-
-    const iid = setInterval(fetch, 3000);
-    return () => clearInterval(iid);
-  }, []);
+  const { value: apps, setValue: setApps } = useAsyncInterval(
+    [],
+    getApps,
+    3000
+  );
 
   const remove = async (appId: string) => {
     await removeApp(appId);
-    setApplications((prev) => prev.filter((app) => app.id !== appId));
+    setApps((prev) => prev.filter((app) => app.id !== appId));
   };
 
   return (
     <DashboardLayout
       title="Applications"
-      subtitle="Manage installed applications"
+      subtitle="Manage dockship applications"
     >
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge>{applications.length} apps</Badge>
+          <Badge>{apps.length} apps</Badge>
         </div>
-        <InstallApplicationDialog>
+        <RegisterAppDialog>
           <Button size="sm" className="gap-2 w-full sm:w-auto">
-            <Plus className="w-4 h-4" /> Install Application
+            <Plus className="w-4 h-4" /> Register Application
           </Button>
-        </InstallApplicationDialog>
+        </RegisterAppDialog>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {applications.map((app) => (
+        {apps.map((app) => (
           <Card key={app.id}>
             <CardHeader>
               <CardTitle>{app.name}</CardTitle>

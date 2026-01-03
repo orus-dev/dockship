@@ -26,29 +26,22 @@ import {
   NodeLiveData,
 } from "@/lib/types";
 import { getDocker } from "@/lib/dockship/docker";
-import { getApplications } from "@/lib/dockship/application";
+import { getApps } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 import { getDeployments } from "@/lib/dockship/deploy";
+import { useAsync, useAsyncInterval } from "@/hooks/use-async";
 
 export default function OverviewPage() {
-  const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
-  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
-  const [apps, setApplications] = useState<Application[]>([]);
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
-
-  useEffect(() => {
-    const fetchNodes = async () => {
-      const nodes = await getLiveNodes();
-      setNodes(nodes);
-      setDockerNodes(await getDocker(nodes));
-      setApplications(await getApplications());
-      setDeployments((await getDeployments()).filter((d) => d !== null));
-    };
-    fetchNodes();
-    const interval = setInterval(fetchNodes, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { value: nodes } = useAsyncInterval([], getLiveNodes, 3000);
+  const { value: dockerNodes } = useAsync([], async () => getDocker(nodes), [
+    nodes,
+  ]);
+  const { value: apps } = useAsyncInterval([], getApps, 3000);
+  const { value: deployments } = useAsyncInterval(
+    [],
+    async () => (await getDeployments()).filter((d) => d !== null),
+    3000
+  );
 
   const appNameByContainer = useMemo(() => {
     const map = new Map<string, string>();
@@ -138,12 +131,8 @@ export default function OverviewPage() {
                       {app.name}
                     </div>
 
-                    <div className="col-span-4 text-muted-foreground">
+                    <div className="col-span-7 text-muted-foreground">
                       {app.deployments.length}
-                    </div>
-
-                    <div className="col-span-3 truncate">
-                      {nodes.find((n) => n.node_id === app.nodeId)?.name ?? "—"}
                     </div>
                   </div>
                 ))

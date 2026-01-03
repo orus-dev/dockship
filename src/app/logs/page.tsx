@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,25 +9,19 @@ import { Pause, Play, Download, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Log } from "@/lib/types";
 import { getAllContainerLogs } from "@/lib/dockship/docker";
+import { useAsyncInterval } from "@/hooks/use-async";
+import { AnsiText } from "@/components/ansi/Ansi";
 
 export default function LogsPage() {
   const [isPaused, setIsPaused] = useState(false);
   const [filter, setFilter] = useState<"all" | "info" | "warn" | "error">(
     "all"
   );
-  const [logs, setLogs] = useState<Log[]>([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      if (!isPaused) setLogs(await getAllContainerLogs());
-    };
-
-    const iid = setInterval(fetch, 1000);
-
-    fetch();
-
-    return () => clearInterval(iid);
-  }, []);
+  const { value: logs, setValue: setLogs } = useAsyncInterval(
+    [],
+    async () => (isPaused ? ([] as Log[]) : getAllContainerLogs()),
+    1000
+  );
 
   const filteredLogs = logs.filter((log) =>
     filter === "all" ? true : log.level === filter
@@ -189,9 +183,10 @@ export default function LogsPage() {
                 </span>
 
                 {/* Message */}
-                <span className="text-foreground wrap-break-words">
+                {/* <span className="text-foreground wrap-break-words">
                   {log.message}
-                </span>
+                </span> */}
+                <AnsiText text={log.message} />
               </div>
             ))}
           </div>

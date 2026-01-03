@@ -52,9 +52,9 @@ export interface Application {
   id: string;
   name: string;
   repo: string;
-  nodeId: string;
   createdAt: string;
   deployments: string[];
+  env: Record<string, EnvVariable>;
 }
 
 export interface Deployment {
@@ -87,4 +87,10 @@ export interface Env {
   id: string;
   name: string;
   variables: Record<string, EnvVariable>;
+}
+
+export interface Port {
+  containerPort: string;
+  hostPort: string;
+  protocol: "tcp" | "udp";
 }

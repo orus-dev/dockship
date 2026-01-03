@@ -1,11 +1,14 @@
 "use server";
 
 import Docker from "dockerode";
-import { Application, Deployment } from "@/lib/types";
+import { Application, Deployment, Port } from "@/lib/types";
 import { CPUusage } from "@/lib/server/calc";
 import path from "path";
 import fs from "fs";
 import pLimit from "p-limit";
+import { randomUUID } from "crypto";
+import simpleGit from "simple-git";
+import { cloneRepo } from "./git";
 
 const docker = new Docker();
 
@@ -17,10 +20,23 @@ function sanitizeString(str: string): string {
   );
 }
 
+function formatPorts(ports: Port[]) {
+  const dockerPorts: Record<string, { HostPort: string }[]> = {};
+
+  ports.forEach(({ containerPort, hostPort, protocol }) => {
+    const key = `${containerPort}/${protocol}`;
+    if (!dockerPorts[key]) {
+      dockerPorts[key] = [];
+    }
+    dockerPorts[key].push({ HostPort: hostPort });
+  });
+
+  return dockerPorts;
+}
+
 export async function getDeployments(
   apps: Application[]
 ): Promise<Deployment[]> {
-  // Limit concurrent Docker calls (adjust if needed)
   const limit = pLimit(5);
 
   const deploymentIds = apps.flatMap((app) => app.deployments);
@@ -94,23 +110,28 @@ export async function getDeployments(
 
 export async function deployApp(
   name: string,
-  appId: string
+  app: Application,
+  ports: Port[]
 ): Promise<string | undefined> {
-  const appPath = path.join("data", "apps", appId, "repo");
-  const imageTag = `dockship/${appId}:latest`;
+  const deployId = randomUUID();
+  const deployPath = path.join("data", "deploys", deployId);
+  const imageTag = `dockship/${deployId}:latest`;
+
+  // Clone the repo
+  await cloneRepo(app.repo, deployPath);
 
   try {
     // Check if app exists
-    fs.accessSync(appPath);
+    fs.accessSync(deployPath);
   } catch {
-    console.error("Repo does not exist:", appPath);
+    console.error("Repo does not exist:", deployPath);
     return undefined;
   }
 
   try {
     const stream = await docker.buildImage(
       {
-        context: appPath,
+        context: deployPath,
         src: ["Dockerfile", "."],
       },
       { t: imageTag }
@@ -128,10 +149,11 @@ export async function deployApp(
       Tty: true,
       HostConfig: {
         RestartPolicy: { Name: "unless-stopped" },
-        PortBindings: {
-          "3000/tcp": [{ HostPort: "3800" }],
-        },
+        PortBindings: formatPorts(ports),
       },
+      Env: Object.entries(app.env).map(
+        ([key, { value }]) => `${key}="${value.replaceAll('"', '\\"')}"`
+      ),
     });
 
     await container.start();
@@ -140,5 +162,7 @@ export async function deployApp(
   } catch (err) {
     console.error("Failed to deploy app:", err);
     return undefined;
+  } finally {
+    fs.rmSync(deployPath, { recursive: true, force: true });
   }
 }

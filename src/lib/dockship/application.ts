@@ -1,88 +1,99 @@
 "use server";
 
 import { verifySession } from "../../core/auth/session";
-import { getNodes } from "@/lib/dockship/node";
-import axios from "axios";
 import { Env, EnvVariable, Application } from "@/lib/types";
+import { read, write } from "@/app/api/file";
+import { randomUUID } from "crypto";
 
-export async function installApp(name: string, repo: string, nodeId: string) {
+export async function getApps(): Promise<Application[]> {
   if (await verifySession()) {
     throw new Error("Unauthorized");
   }
 
-  const nodes = await getNodes();
-
-  const targetNode = nodes.find((node) => node.node_id === nodeId);
-
-  return await (
-    await axios.post(
-      `http://${targetNode?.ip}:3000/api/applications`,
-      { name, repo, nodeId },
-      {
-        headers: { Authorization: `ApiKey ${targetNode?.key}` },
-      }
-    )
-  ).data.applications;
+  return read(() => [], "data", "apps.json");
 }
 
-export async function getApplications(): Promise<Application[]> {
-  const nodes = await getNodes();
+export async function getApp(appId: string): Promise<Application | undefined> {
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
 
-  return (
-    await Promise.all(
-      nodes.map(
-        async (n) =>
-          await (
-            await axios.get(`http://${n.ip}:3000/api/applications`, {
-              headers: { Authorization: `ApiKey ${n.key}` },
-            })
-          ).data.applications
-      )
-    )
-  ).flat();
+  return (await read<Application[]>(() => [], "data", "apps.json")).find(
+    (app) => app.id === appId
+  );
+}
+
+export async function registerApp(name: string, repo: string) {
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
+
+  const app: Application = {
+    id: randomUUID(),
+    name,
+    repo,
+    createdAt: new Date().toISOString(),
+    deployments: [],
+    env: {},
+  };
+
+  await write([...(await getApps()), app], "data", "apps.json");
+
+  return app;
+}
+
+export async function removeApp(appId: string) {
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
+
+  const apps = await getApps();
+
+  const nextApps = apps.filter((app) => app.id !== appId);
+
+  await write(nextApps, "data", "apps.json");
+}
+
+export async function editApp(appId: string, updatedApp: Application) {
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
+
+  const apps = await getApps();
+
+  const nextApps = apps.map((app) => (app.id === appId ? updatedApp : app));
+
+  await write(nextApps, "data", "apps.json");
 }
 
 export async function getEnv(): Promise<Record<string, Env>> {
-  const nodes = await getNodes();
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
 
-  const envRecords = await Promise.all(
-    nodes.map(async (n) => {
-      const response = await axios.get(`http://${n.ip}:3000/api/env`, {
-        headers: { Authorization: `ApiKey ${n.key}` },
-      });
-      return response.data as Record<string, Env>;
-    })
-  );
+  const apps = await getApps();
 
-  const merged: Record<string, Env> = Object.assign({}, ...envRecords);
+  return apps.reduce<Record<string, Env>>((acc, app) => {
+    acc[app.id] = {
+      id: app.id,
+      name: app.name,
+      variables: app.env,
+    };
 
-  return merged;
+    return acc;
+  }, {});
 }
 
 export async function setEnv(
   appId: string,
   variables: Record<string, EnvVariable>
 ) {
-  const nodes = await getNodes();
+  if (await verifySession()) {
+    throw new Error("Unauthorized");
+  }
 
-  nodes.forEach(async (n) => {
-    await axios.post(
-      `http://${n.ip}:3000/api/env`,
-      { appId, variables },
-      {
-        headers: { Authorization: `ApiKey ${n.key}` },
-      }
-    );
-  });
-}
-
-export async function removeApp(appId: string) {
-  const nodes = await getNodes();
-
-  nodes.forEach(async (n) => {
-    await axios.delete(`http://${n.ip}:3000/api/applications`, {
-      params: { appId },
-      headers: { Authorization: `ApiKey ${n.key}` },
-    });
-  });
+  const apps = await getApps();
+  const app = apps.find((app) => app.id === appId);
+  if (!app) throw new Error("App not found");
+  editApp(appId, { ...app, env: variables });
 }

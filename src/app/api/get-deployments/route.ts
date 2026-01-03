@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import testAuth from "../auth";
 import { StatusCodes } from "http-status-codes";
-import { deployApp } from "@/core/deployment";
-import { Application, Port } from "@/lib/types";
+import { getDeployments } from "@/core/deployment";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const auth = await testAuth(req);
-  const {
-    name,
-    app,
-    ports,
-  }: { name: string; app: Application; ports: Port[] } = await req.json();
+  const apps = await req.json();
 
   if (auth) {
     return NextResponse.json(
@@ -19,17 +14,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if (!name || !app) {
+  if (!apps)
     return NextResponse.json(
-      { message: "Body missing name, appId, nodeId" },
-      { status: StatusCodes.BAD_REQUEST }
+      { message: "Body should be Application[]" },
+      { status: StatusCodes.UNAUTHORIZED }
     );
-  }
 
-  const deployId = await deployApp(name, app, ports);
+  const deployments = await getDeployments(apps);
 
   return NextResponse.json({
     message: "ok",
-    deployId,
+    deployments,
   });
 }

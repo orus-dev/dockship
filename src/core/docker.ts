@@ -67,36 +67,52 @@ function demuxLogs(buffer: Buffer): string {
 
   return output;
 }
-
 async function getContainerLogs(
   containerId: string,
   name: string
 ): Promise<Log[]> {
   const container = docker.getContainer(containerId);
 
-  const raw = await container.logs({
-    stdout: true,
-    stderr: true,
-    timestamps: true,
-  });
+  // Inspect the container to check the logging driver
+  const info = await container.inspect();
+  const driver = info.HostConfig.LogConfig?.Type;
 
-  const text = demuxLogs(raw);
+  if (driver !== "json-file" && driver !== "journald") {
+    // Skip containers with unsupported logging drivers
+    return [];
+  }
 
-  return text
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => {
-      const firstSpace = line.indexOf(" ");
-      const timestamp = line.slice(0, firstSpace);
-      const message = line.slice(firstSpace + 1);
-
-      return {
-        timestamp,
-        level: inferLevel(message),
-        source: name,
-        message,
-      } satisfies Log;
+  try {
+    const raw = await container.logs({
+      stdout: true,
+      stderr: true,
+      timestamps: true,
     });
+
+    const text = demuxLogs(raw);
+
+    return text
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const firstSpace = line.indexOf(" ");
+        const timestamp = line.slice(0, firstSpace);
+        const message = line.slice(firstSpace + 1);
+
+        return {
+          timestamp,
+          level: inferLevel(message),
+          source: name,
+          message,
+        } satisfies Log;
+      });
+  } catch (err: any) {
+    if (err.statusCode === 501) {
+      // Logging driver does not support reading
+      return [];
+    }
+    throw err; // rethrow any other error
+  }
 }
 
 export async function getAllContainerLogs(): Promise<Log[]> {

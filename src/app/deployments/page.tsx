@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Rocket, RotateCcw, Eye, MoreVertical, Plus } from "lucide-react";
 import { Application, Deployment } from "@/lib/types";
 import { getDeployments } from "@/lib/dockship/deploy";
-import { getApplications } from "@/lib/dockship/application";
+import { getApps } from "@/lib/dockship/application";
 import { cn } from "@/lib/utils";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
+import { useAsync } from "@/hooks/use-async";
 
 const statusDot = {
   running: "bg-chart-2",
@@ -19,46 +20,19 @@ const statusDot = {
 } as const;
 
 export default function DeploymentsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [deployments, setDeployments] = useState<Deployment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { value: apps } = useAsync([], getApps);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function fetchData() {
-      try {
-        const [apps, deps] = await Promise.all([
-          getApplications(),
-          getDeployments(),
-        ]);
-
-        if (!mounted) return;
-
-        setApplications(apps);
-        setDeployments(deps.filter((d) => d !== null));
-      } catch (err) {
-        console.error("Failed to load deployments:", err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    fetchData();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { value: deployments, loading } = useAsync([], getDeployments, [apps]);
 
   const appNameByContainer = useMemo(() => {
     const map = new Map<string, string>();
-    for (const app of applications) {
+    for (const app of apps) {
       for (const container of app.deployments) {
         map.set(container, app.name);
       }
     }
     return map;
-  }, [applications]);
+  }, [apps]);
 
   return (
     <DashboardLayout
@@ -68,7 +42,9 @@ export default function DeploymentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Badge>
-          {loading ? "Loading…" : `${deployments.length} deployments`}
+          {loading
+            ? "Loading…"
+            : `${deployments.length} deployment${deployments.length > 0 && 's'}`}
         </Badge>
 
         <DeployAppDialog>
