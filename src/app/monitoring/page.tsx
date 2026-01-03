@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig } from "@/components/ui/chart";
 import GradientAreaChart from "@/components/GradientAreaChart";
 import { getMetrics } from "@/lib/dockship/metrics";
-import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import RadialChart from "@/components/RadialChart";
 import { getLiveNodes, getNodes } from "@/lib/dockship/node";
@@ -70,6 +69,12 @@ export default function MonitoringPage() {
     []
   );
 
+  const containerCPU = containerStats.reduce((acc, val) => acc + val.cpu, 0);
+  const containerMemory = containerStats.reduce(
+    (acc, val) => acc + val.memory,
+    0
+  );
+
   return (
     <DashboardLayout
       title="Monitoring"
@@ -77,15 +82,25 @@ export default function MonitoringPage() {
     >
       {/* Summary Stats */}
       {isMobile ? (
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardContent className="px-4">
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
               <RadialChart value={liveData?.cpuUsage || 0}>CPU</RadialChart>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="px-4">
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
               <RadialChart value={liveData?.ramUsage || 0}>RAM</RadialChart>
+            </CardContent>
+          </Card>
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
+              <RadialChart value={containerCPU}>con CPU</RadialChart>
+            </CardContent>
+          </Card>
+          <Card className="p-0 flex items-center justify-center">
+            <CardContent className="p-1 flex items-center justify-center">
+              <RadialChart value={containerMemory}>con RAM</RadialChart>
             </CardContent>
           </Card>
         </div>
@@ -97,7 +112,7 @@ export default function MonitoringPage() {
                 CPU usage
               </div>
               <div className="stat-value">
-                {liveData?.cpuUsage?.toFixed(0) || 0}%
+                {liveData?.cpuUsage?.toFixed(1) || 0}%
               </div>
               <Progress value={liveData?.cpuUsage} className="w-full" />
             </CardContent>
@@ -108,7 +123,7 @@ export default function MonitoringPage() {
                 Memory usage
               </div>
               <div className="stat-value">
-                {liveData?.ramUsage?.toFixed(0) || 0}%
+                {liveData?.ramUsage?.toFixed(1) || 0}%
               </div>
               <Progress value={liveData?.ramUsage} className="w-full" />
             </CardContent>
@@ -116,21 +131,19 @@ export default function MonitoringPage() {
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Network In
+                Container CPU usage
               </div>
-              <div className="stat-value">38 MB/s</div>
-              <div className="text-xs text-success mt-1">↑ 12% from avg</div>
+              <div className="stat-value">{containerCPU.toFixed(1)}%</div>
+              <Progress value={containerCPU} className="w-full" />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                Network Out
+                Container memory usage
               </div>
-              <div className="stat-value">28 MB/s</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                ↓ 5% from avg
-              </div>
+              <div className="stat-value">{containerMemory.toFixed(1)}%</div>
+              <Progress value={containerMemory} className="w-full" />
             </CardContent>
           </Card>
         </div>
