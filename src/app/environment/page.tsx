@@ -16,22 +16,16 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useAsync } from "@/hooks/use-async";
 
 export default function EnvironmentPage() {
-  const [selectedApp, setSelectedApp] = useState("");
-  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
-  const [envGroups, setEnvGroups] = useState<Record<string, Env>>({});
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const env = await getEnv();
-      setEnvGroups(env);
-      const vars = Object.keys(env);
-      if (vars.length > 0) setSelectedApp(vars[0]);
-    };
-    fetch();
-  }, []);
+  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const { value: envGroups, setValue: setEnvGroups } = useAsync({}, getEnv);
+  const { value: selectedApp, setValue: setSelectedApp } = useAsync(
+    "",
+    async () => Object.keys(envGroups)[0] || ""
+  );
 
   const handleSave = async () => {
     setIsSaving(true);

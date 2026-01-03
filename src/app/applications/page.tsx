@@ -13,26 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Plus, Rocket } from "lucide-react";
 import InstallApplicationDialog from "@/components/dialogs/InstallApplication";
-import { useEffect, useState } from "react";
 import { getApplications, removeApp } from "@/lib/dockship/application";
 import RemoveDialog from "@/components/dialogs/Remove";
-import { Application } from "@/lib/types";
 import DeployAppDialog from "@/components/dialogs/DeployApp";
+import { useAsyncInterval } from "@/hooks/use-async";
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const apps = await getApplications();
-      setApplications(apps);
-    };
-
-    fetch();
-
-    const iid = setInterval(fetch, 3000);
-    return () => clearInterval(iid);
-  }, []);
+  const { value: applications, setValue: setApplications } = useAsyncInterval(
+    [],
+    getApplications,
+    3000
+  );
 
   const remove = async (appId: string) => {
     await removeApp(appId);

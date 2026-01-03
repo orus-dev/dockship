@@ -17,23 +17,17 @@ import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
 import { Node, NodeLiveData } from "@/lib/types";
 import { installApp } from "@/lib/dockship/application";
+import { useAsync } from "@/hooks/use-async";
 
 export default function InstallApplicationDialog({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [nodeList, setNodeList] = useState<(NodeLiveData & Node)[]>([]);
+  const { value: nodes } = useAsync([], getLiveNodes);
   const [name, setName] = useState("");
   const [repo, setRepo] = useState("");
   const [node, setNode] = useState("");
-
-  useEffect(() => {
-    const fetchNodes = async () => {
-      setNodeList(await getLiveNodes());
-    };
-    fetchNodes();
-  }, []);
 
   const deploy = async () => {
     console.log(await installApp(name, repo, node));
@@ -80,7 +74,7 @@ export default function InstallApplicationDialog({
             <Combobox
               value={node}
               setValue={setNode}
-              data={nodeList
+              data={nodes
                 .filter((node) => node.liveData)
                 .map((node) => ({ label: node.name, value: node.node_id }))}
               placeholder="Select Node..."

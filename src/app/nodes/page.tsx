@@ -14,6 +14,7 @@ import { setNodes as updateNodes } from "@/lib/dockship/node";
 import AddNode from "@/components/dialogs/AddNode";
 import { getDocker } from "@/lib/dockship/docker";
 import RemoveDialog from "@/components/dialogs/Remove";
+import { useAsync, useAsyncInterval } from "@/hooks/use-async";
 
 function DiskUsage({ liveData }: NodeLiveData) {
   if (!liveData) return null;
@@ -33,25 +34,15 @@ function DiskUsage({ liveData }: NodeLiveData) {
 }
 
 export default function NodesPage() {
-  const [nodes, setNodes] = useState<(NodeLiveData & Node)[]>([]);
-  const [dockerNodes, setDockerNodes] = useState<Docker[]>([]);
+  const { value: nodes, setValue: setNodes } = useAsyncInterval(
+    [],
+    getLiveNodes,
+    3000
+  );
 
-  useEffect(() => {
-    const fetchNodes = async () => {
-      const nodes = await getLiveNodes();
-      setNodes(nodes);
-    };
-    fetchNodes();
-    const interval = setInterval(fetchNodes, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const fetchDocker = async () => {
-      setDockerNodes(await getDocker(nodes));
-    };
-    fetchDocker();
-  }, [nodes]);
+  const { value: dockerNodes } = useAsync([], async () => getDocker(nodes), [
+    nodes,
+  ]);
 
   return (
     <DashboardLayout title="Nodes" subtitle="Cluster node management">

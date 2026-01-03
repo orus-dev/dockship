@@ -13,6 +13,7 @@ import { getLiveNodes, getNodes } from "@/lib/dockship/node";
 import { average } from "@/lib/format";
 import { getContainerStats, getDocker } from "@/lib/dockship/docker";
 import { SimpleStats } from "@/lib/types";
+import { useAsync, useAsyncInterval } from "@/hooks/use-async";
 
 const cpuChartConfig = {
   cpu: { label: "CPU Usage", color: "var(--chart-1)" },
@@ -29,73 +30,74 @@ const networkChartConfig = {
 
 export default function MonitoringPage() {
   const [data, setData] = useState<
-    {
-      time: string;
-      cpu: number;
-      memory: number;
-      in: number;
-      out: number;
-    }[]
+    { time: string; cpu: number; memory: number; in: number; out: number }[]
   >([]);
   const isMobile = useIsMobile();
   const [liveData, setLiveData] = useState<{
     cpuUsage: number;
     ramUsage: number;
   }>();
-  const [containerStats, SetContainerStats] = useState<
+  const [containerStats, setContainerStats] = useState<
     (SimpleStats & { name: string })[]
   >([]);
 
-  useEffect(() => {
-    const fetchNodes = async () => {
+  // Live nodes polling every 3 seconds
+  const { value: liveNodes } = useAsyncInterval(
+    { cpuUsage: 0, ramUsage: 0 },
+    async () => {
       const nodes = await getLiveNodes();
-      setLiveData({
+      return {
         cpuUsage: average(nodes, (n) => n.liveData?.cpu.usage || 0),
         ramUsage: average(nodes, (n) => n.liveData?.memory.usage || 0),
-      });
-    };
-    fetchNodes();
-    const interval = setInterval(fetchNodes, 3000);
-    return () => clearInterval(interval);
-  }, []);
+      };
+    },
+    3000,
+    []
+  );
 
+  // Update liveData state
   useEffect(() => {
-    async function fetchMetrics() {
-      setData(await getMetrics());
-    }
+    setLiveData(liveNodes);
+  }, [liveNodes]);
 
-    fetchMetrics();
+  // Metrics polling every 30 seconds
+  const { value: metrics } = useAsyncInterval(
+    [] as typeof data,
+    getMetrics,
+    30000,
+    []
+  );
 
-    const i = setInterval(fetchMetrics, 30000);
-
-    return () => clearInterval(i);
-  }, []);
-
+  // Update data state
   useEffect(() => {
-    async function fetchContainerMetrics() {
+    setData(metrics);
+  }, [metrics]);
+
+  // Container stats fetched once
+  const { value: containers } = useAsync(
+    [] as typeof containerStats,
+    async () => {
       const nodes = await getNodes();
       const dockerNodes = await getDocker(nodes);
 
-      SetContainerStats(
-        (
-          await Promise.all(
-            dockerNodes.flatMap((node) =>
-              node.containers.map(async (c) => {
-                const stats = await getContainerStats(c.Id);
-
-                if (stats === undefined) return undefined;
-
-                return { ...stats, name: c.Names[0] };
-              })
-            )
+      return (
+        await Promise.all(
+          dockerNodes.flatMap((node) =>
+            node.containers.map(async (c) => {
+              const stats = await getContainerStats(c.Id);
+              if (!stats) return undefined;
+              return { ...stats, name: c.Names[0] };
+            })
           )
-        ).filter((s): s is SimpleStats & { name: string } => s !== undefined)
-      );
+        )
+      ).filter((s): s is SimpleStats & { name: string } => s !== undefined);
+    },
+    []
+  );
 
-      console.log(containerStats);
-    }
-    fetchContainerMetrics();
-  }, []);
+  useEffect(() => {
+    setContainerStats(containers);
+  }, [containers]);
 
   return (
     <DashboardLayout

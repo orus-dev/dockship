@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode, useEffect } from "react";
+import { useState, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getLiveNodes } from "@/lib/dockship/node";
 import { Combobox } from "../ui/combobox";
-import { Application, Node, NodeLiveData } from "@/lib/types";
 import { getApplications } from "@/core/application";
 import { deployApp } from "@/lib/dockship/deploy";
+import { useAsync } from "@/hooks/use-async";
 
 export default function DeployAppDialog({
   defaultApp,
@@ -26,20 +26,11 @@ export default function DeployAppDialog({
   defaultApp?: string;
   children: ReactNode;
 }) {
-  const [nodeList, setNodeList] = useState<(NodeLiveData & Node)[]>([]);
-  const [apps, setApps] = useState<Application[]>([]);
-
+  const { value: nodes } = useAsync([], getLiveNodes);
+  const { value: applications } = useAsync([], getApplications);
   const [name, setName] = useState("");
   const [app, setApp] = useState(defaultApp || "");
   const [node, setNode] = useState("");
-
-  useEffect(() => {
-    const fetchNodes = async () => {
-      setNodeList(await getLiveNodes());
-      setApps(await getApplications());
-    };
-    fetchNodes();
-  }, []);
 
   const deploy = async () => {
     console.log(name, app, node);
@@ -75,7 +66,7 @@ export default function DeployAppDialog({
             <Combobox
               value={app}
               setValue={setApp}
-              data={apps.map((app) => ({
+              data={applications.map((app) => ({
                 label: app.name,
                 value: app.id,
               }))}
@@ -91,7 +82,7 @@ export default function DeployAppDialog({
             <Combobox
               value={node}
               setValue={setNode}
-              data={nodeList
+              data={nodes
                 .filter((node) => node.liveData)
                 .map((node) => ({ label: node.name, value: node.node_id }))}
               placeholder="Select Node..."
